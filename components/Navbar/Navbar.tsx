@@ -71,7 +71,7 @@ const Navbar = () => {
   }, [lastScrollY, scrollDelta, scrollThreshold]);
 
   return (
-    <div className="w-dvw h-[100px] flex items-center justify-center fixed top-0 left-0 z-50">
+    <div className="w-dvw h-[100px] flex items-center justify-center fixed top-0 left-0 z-9999">
       {/* ---------------------------------------
           NAVBAR CONTAINER (Animated show/hide)
       ---------------------------------------- */}
@@ -99,7 +99,7 @@ const Navbar = () => {
             delay: isVisible ? 0 : 0.3,
           },
         }}
-        className="w-fit h-fit py-3 px-7 rounded-full bg-black flex justify-between gap-32 shadow-2xl shadow-zinc-800 origin-center overflow-hidden"
+        className="border border-zinc-700 w-fit h-fit py-3 px-7 rounded-full bg-black flex justify-between gap-32 shadow-2xl shadow-zinc-800 origin-center overflow-hidden"
       >
         {/* ---------------------------------------
             LOGO + ICON (Fades in/out)
