@@ -65,7 +65,7 @@ const HowItWorks = () => {
                 <motion.div
                   layoutId="highlight"
                   className={`absolute inset-0 ${
-                    isActive ? "bg-orange-200" : "bg-zinc-500/20"
+                    isActive ? "bg-orange-200" : "bg-zinc-400/10"
                   }  rounded-xl -z-10`}
                   transition={{ type: "spring", stiffness: 250, damping: 28 }}
                 />
@@ -101,7 +101,7 @@ const HowItWorks = () => {
         <motion.img
           key={STEPS[currentStep].step_image}
           src={STEPS[currentStep].step_image}
-          className="absolute inset-0 top-24 mx-auto h-[350px] rounded-lg shadow-2xl shadow-zinc-200/60"
+          className="absolute inset-0 top-24 mx-auto h-[350px] rounded-xl shadow-2xl shadow-zinc-200/60"
           initial={{ opacity: 0, y: 20, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.45 }}

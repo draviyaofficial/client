@@ -1,3 +1,4 @@
+import FAQ from "@/components/FAQ/FAQ";
 import Features from "@/components/Features/Features";
 import Hero from "@/components/Hero/Hero";
 import HowItWorks from "@/components/HowItWorks/HowItWorks";
@@ -10,6 +11,7 @@ export default function Page() {
       <Hero />
       <Features />
       <HowItWorks />
+      <FAQ />
     </>
   );
 }
