@@ -67,7 +67,7 @@ const Hero = () => {
           <img
             src="/images/hero/dashboard-img.png"
             alt="Dashboard"
-            className="h-[800px] rounded-4xl relative z-10"
+            className="h-[300px] sm:h-[400px] md:h-[500px] lg:h-[700px] rounded-xl sm:rounded-2xl lg:rounded-4xl relative z-10"
           />
 
           {/* Glow after reveal */}

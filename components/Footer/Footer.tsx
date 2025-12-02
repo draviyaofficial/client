@@ -40,7 +40,7 @@ const FOOTER_ITEMS = [
 
 const Footer = () => {
   return (
-    <section className="w-dvw h-[90dvh] p-2 relative">
+    <section className="w-dvw h-[90dvh] p-2 relative overflow-x-hidden">
       <img
         src="/images/footer/bg.png"
         alt=""

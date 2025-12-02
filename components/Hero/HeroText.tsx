@@ -16,7 +16,6 @@ const HeroText = ({ text }: HeroTextProps) => {
   const words = text.split(" ");
   const heroTextRef = useRef<HTMLHeadingElement>(null);
 
-  // Scroll fade + shrink GSAP animation
   useGSAP(() => {
     if (!heroTextRef.current) return;
 
@@ -36,7 +35,7 @@ const HeroText = ({ text }: HeroTextProps) => {
   return (
     <h1
       ref={heroTextRef}
-      className="text-8xl max-w-4xl text-center font-medium flex flex-wrap justify-center gap-x-3"
+      className="text-7xl lg:text-8xl max-w-4xl text-center font-medium flex flex-wrap justify-center content-center gap-x-3 gap-y-2"
     >
       {words.map((word, index) => (
         <motion.span

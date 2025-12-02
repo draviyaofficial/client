@@ -48,7 +48,7 @@ const FAQ = () => {
   const [open, setOpen] = useState(0);
 
   return (
-    <section className="w-dvw h-fit px-40 my-40">
+    <section className="w-dvw h-fit px-40 my-40 overflow-x-hidden">
       {/* Top Row */}
       <div className="flex justify-between w-full">
         <h3 className="text-6xl font-medium text-zinc-900 leading-tight">
