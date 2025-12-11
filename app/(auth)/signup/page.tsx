@@ -10,7 +10,13 @@ import { AuthCard } from "@/components/auth/auth-card";
 import { CustomFormField } from "@/components/ui/custom-form-field";
 import { signupSchema, SignupFormValues } from "@/lib/schemas/auth-schema";
 
+// 1. Import the custom hook
+import { useAuth } from "@/services/auth/model/hooks/useAuth";
+
 const SignupPage = () => {
+  // 2. Destructure register function and loading state
+  const { register, isRegistering } = useAuth();
+
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -23,13 +29,29 @@ const SignupPage = () => {
   });
 
   function onSubmit(data: SignupFormValues) {
-    toast("Account created:", {
-      description: (
-        <pre className="bg-zinc-950 text-zinc-50 mt-2 w-[300px] overflow-x-auto rounded-md p-4 text-xs">
-          <code>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
+    // 3. Trigger the mutation
+    // We explicitly exclude confirmPassword as the backend doesn't need it
+    register(
+      {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Account created successfully!", {
+            description: "Redirecting you to login...",
+          });
+          // Redirect is handled inside useAuth, or you can do it here manually
+        },
+        onError: (error) => {
+          toast.error("Registration failed", {
+            description:
+              error.message || "Please check your details and try again.",
+          });
+        },
+      }
+    );
   }
 
   return (
@@ -37,15 +59,17 @@ const SignupPage = () => {
       title="Create Account"
       description="Join us today! Enter your details below."
       submitLabel="Sign Up"
-      isSubmitting={form.formState.isSubmitting}
+      // 4. Bind the correct loading state
+      isSubmitting={isRegistering}
     >
       <form id="auth-form" onSubmit={form.handleSubmit(onSubmit)}>
-        <FieldGroup>
+        <FieldGroup className="space-y-2">
           <CustomFormField
             control={form.control}
             name="name"
             placeholder="Full Name"
             autoComplete="name"
+            disabled={isRegistering}
           />
           <CustomFormField
             control={form.control}
@@ -53,6 +77,7 @@ const SignupPage = () => {
             type="email"
             placeholder="you@example.com"
             autoComplete="email"
+            disabled={isRegistering}
           />
           <CustomFormField
             control={form.control}
@@ -60,7 +85,8 @@ const SignupPage = () => {
             type="password"
             placeholder="Create a password"
             autoComplete="new-password"
-            description="Must start with a letter and contain at least 8 characters (1 uppercase, 1 number, 1 special)."
+            description="Must start with a letter and contain at least 8 characters."
+            disabled={isRegistering}
           />
           <CustomFormField
             control={form.control}
@@ -68,6 +94,7 @@ const SignupPage = () => {
             type="password"
             placeholder="Confirm your password"
             autoComplete="new-password"
+            disabled={isRegistering}
           />
         </FieldGroup>
       </form>

@@ -42,6 +42,7 @@ interface CustomFormFieldProps<T extends FieldValues> {
   fieldType?: "input" | "textarea" | "select"; // Logic switcher
   options?: Option[]; // For Select types
   className?: string; // Allow custom overrides
+  disabled?: boolean;
 }
 
 /**
@@ -59,6 +60,7 @@ export const CustomFormField = <T extends FieldValues>({
   fieldType = "input",
   options = [],
   className,
+  disabled = false,
 }: CustomFormFieldProps<T>) => {
   return (
     <Controller
@@ -92,6 +94,7 @@ export const CustomFormField = <T extends FieldValues>({
                 placeholder={placeholder}
                 autoComplete={autoComplete}
                 className={INNER_INPUT_STYLES}
+                disabled={disabled}
               />
             )}
 
@@ -102,12 +105,17 @@ export const CustomFormField = <T extends FieldValues>({
                 id={name}
                 placeholder={placeholder}
                 className={cn(INNER_INPUT_STYLES, "min-h-[100px]")} // Add height for textarea
+                disabled={disabled}
               />
             )}
 
             {/* 3. SELECT DROPDOWN */}
             {fieldType === "select" && (
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                disabled={disabled}
+              >
                 <SelectTrigger
                   className={cn(
                     INNER_INPUT_STYLES,
