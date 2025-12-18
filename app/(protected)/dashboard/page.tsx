@@ -114,19 +114,19 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 bg-white rounded-xl p-10">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-12">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900">
-            Welcome back, {user?.name?.split(" ")[0]}!
+          <h1 className="text-5xl font-semibold tracking-tight text-zinc-900">
+            Dashboard
           </h1>
-          <p className="text-zinc-500 mt-1">
-            Here's what's happening with your investments today.
+          <p className="text-zinc-400 mt-1 text-lg">
+            Your creator investments, all in one place.
           </p>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {mockStats.map((stat, index) => (
           <StatCard key={index} {...stat} />
         ))}
@@ -136,8 +136,10 @@ export default function DashboardPage() {
       <div>
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-zinc-900">Featured IPOs</h2>
-            <p className="text-zinc-500 mt-1">
+            <h2 className="text-3xl font-medium text-zinc-900">
+              Featured IPOs
+            </h2>
+            <p className="text-zinc-400 mt-1">
               Discover new creator opportunities before they go public.
             </p>
           </div>
@@ -153,10 +155,10 @@ export default function DashboardPage() {
       <div>
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-zinc-900">
+            <h2 className="text-3xl font-medium text-zinc-900">
               Trending Creators
             </h2>
-            <p className="text-zinc-500 mt-1">
+            <p className="text-zinc-400 mt-1">
               Creators gaining momentum in the market.
             </p>
           </div>
@@ -168,11 +170,14 @@ export default function DashboardPage() {
               className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow"
             >
               <div className="flex items-center gap-4">
-                <img
-                  src={creator.avatar}
-                  alt={creator.name}
-                  className="h-12 w-12 rounded-full"
-                />
+                <div className="h-12 w-12 rounded-full bg-[#f9efe3] flex items-center justify-center text-zinc-900 font-semibold text-sm">
+                  {creator.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .slice(0, 2)
+                    .toUpperCase()}
+                </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-zinc-900">
                     {creator.name}

@@ -53,8 +53,10 @@ export function ActivityFeed() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-zinc-900">Recent Activity</h2>
-          <p className="text-zinc-500 mt-1">
+          <h2 className="text-3xl font-medium text-zinc-900">
+            Recent Activity
+          </h2>
+          <p className="text-zinc-400 mt-1">
             Your latest transactions and investments.
           </p>
         </div>
@@ -67,9 +69,14 @@ export function ActivityFeed() {
 
         <div className="divide-y divide-zinc-100">
           {mockActivities.map((activity) => (
-            <div key={activity.id} className="p-6 hover:bg-zinc-50 transition-colors">
+            <div
+              key={activity.id}
+              className="p-6 hover:bg-zinc-50 transition-colors"
+            >
               <div className="flex items-center gap-4">
-                <div className={`h-10 w-10 rounded-lg ${activity.bgColor} flex items-center justify-center`}>
+                <div
+                  className={`h-10 w-10 rounded-lg ${activity.bgColor} flex items-center justify-center`}
+                >
                   <activity.icon className={`h-5 w-5 ${activity.iconColor}`} />
                 </div>
 
@@ -78,8 +85,8 @@ export function ActivityFeed() {
                     <p className="font-medium text-zinc-900">
                       {activity.type === "buy" && "Bought"}
                       {activity.type === "sell" && "Sold"}
-                      {activity.type === "ipo" && "Invested in IPO"}
-                      {" "} {activity.tokens} tokens from {activity.creator}
+                      {activity.type === "ipo" && "Invested in IPO"}{" "}
+                      {activity.tokens} tokens from {activity.creator}
                     </p>
                   </div>
                   <div className="flex items-center gap-4 mt-1">
@@ -108,5 +115,3 @@ export function ActivityFeed() {
     </div>
   );
 }
-
-
