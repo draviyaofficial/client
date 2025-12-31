@@ -15,7 +15,9 @@ const verifySchema = z.object({
 
 export async function GET() {
   try {
-    const count = await prisma.waitlist.count({});
+    const count = await prisma.waitlist.count({
+      where: { verified: true }
+    });
     return NextResponse.json({ count }, { status: 200 });
   } catch (error) {
     console.log(error);
