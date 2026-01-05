@@ -43,13 +43,10 @@ export default function ProtectedLayout({
   const { data: user, isLoading } = useUser();
   const { logout, isLoggingOut } = useAuth();
 
-  const handleLogout = () => {
-    logout(undefined, {
-      onSuccess: () => {
-        toast.info("Logged out", {
-          description: "You have been safely logged out.",
-        });
-      },
+  const handleLogout = async () => {
+    await logout();
+    toast.info("Logged out", {
+      description: "You have been safely logged out.",
     });
   };
 

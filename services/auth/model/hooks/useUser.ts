@@ -1,20 +1,25 @@
-import { useQuery } from "@tanstack/react-query";
+import { usePrivy } from "@privy-io/react-auth";
 import { User } from "../types";
-import { fetchMeFn } from "../api/mutations"; // Adjust path if you saved it elsewhere
 
 export const useUser = () => {
-  return useQuery<User | null>({
-    // Unique key for caching user data
-    queryKey: ["current-user"],
+  const { user, ready } = usePrivy();
 
-    // The function that calls your /auth/me endpoint
-    queryFn: fetchMeFn,
+  const adaptedUser: User | null = user
+    ? {
+        id: user.id,
+        email: user.email?.address || "",
+        name:
+          user.google?.name ||
+          user.twitter?.name ||
+          user.email?.address ||
+          "User",
+        role: "user",
+      }
+    : null;
 
-    // Do not retry on failure (if 401, we want to know immediately)
-    retry: false,
-
-    // Time in milliseconds before the data is considered "stale".
-    // 5 minutes is a good balance; keeps the UI fast without hammering the server.
-    staleTime: 5 * 60 * 1000,
-  });
+  return {
+    data: adaptedUser,
+    isLoading: !ready,
+    isError: false,
+  };
 };
