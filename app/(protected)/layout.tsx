@@ -58,6 +58,8 @@ export default function ProtectedLayout({
     );
   }
 
+  console.log(user);
+
   if (!user) {
     return null; // This should be handled by page-level protection
   }
@@ -179,11 +181,11 @@ export default function ProtectedLayout({
           <div className="p-4">
             <div className="flex items-center gap-3 mb-3">
               <div className="h-14 w-14 rounded-full bg-orange-100 flex items-center justify-center text-zinc-600 font-bold">
-                {user.name.charAt(0).toUpperCase()}
+                {(user.name || "Guest").charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-lg font-medium text-zinc-900 truncate">
-                  {user.name}
+                  {user.name || "Guest"}
                 </p>
                 <p className="text-sm text-zinc-500 truncate">{user.email}</p>
               </div>

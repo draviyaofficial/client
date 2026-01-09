@@ -7,8 +7,13 @@ export interface ApiResponse<T> {
 
 export interface User {
   id: string;
-  name: string;
+  externalAuthId: string;
   email: string;
+  firstName?: string;
+  lastName?: string;
+  name?: string; // Derived or legacy
+  country?: string;
+  walletAddress?: string;
   role?: string;
 }
 

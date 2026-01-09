@@ -7,7 +7,7 @@ interface BackendResponse<T> {
   data: T;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
 const defaultHeaders = {
   "Content-Type": "application/json",
@@ -78,14 +78,16 @@ export const logoutFn = async (): Promise<void> => {
 };
 
 // --- FETCH CURRENT USER ---
-export const fetchMeFn = async (): Promise<User | null> => {
+export const fetchMeFn = async (token: string): Promise<User | null> => {
   try {
-    const response = await fetch(`${API_URL}/auth/me`, {
+    const response = await fetch(`${API_URL}/v1/user`, {
       method: "GET",
-      credentials: "include",
+      headers: {
+        ...defaultHeaders,
+        Authorization: `Bearer ${token}`,
+      },
     });
 
-    // 401 or 403 means not logged in → return null
     if (!response.ok) return null;
 
     const json: BackendResponse<User | null> = await response.json();
@@ -96,4 +98,50 @@ export const fetchMeFn = async (): Promise<User | null> => {
   } catch (error) {
     return null;
   }
+};
+
+// --- SYNC PRIVY USER ---
+export const syncUserFn = async (
+  userData: { privyId: string; email?: string; walletAddress?: string },
+  token: string
+): Promise<User> => {
+  const response = await fetch(`${API_URL}/v1/user`, {
+    method: "POST",
+    headers: {
+      ...defaultHeaders,
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(userData),
+  });
+
+  const json: BackendResponse<User> = await response.json();
+
+  if (!response.ok || !json.ok) {
+    throw new Error(json.message || "Sync failed");
+  }
+
+  return json.data;
+};
+
+// --- UPDATE USER ---
+export const updateUserFn = async (
+  userData: Partial<User>,
+  token: string
+): Promise<User> => {
+  const response = await fetch(`${API_URL}/v1/user`, {
+    method: "PATCH",
+    headers: {
+      ...defaultHeaders,
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(userData),
+  });
+
+  const json: BackendResponse<User> = await response.json();
+
+  if (!response.ok || !json.ok) {
+    throw new Error(json.message || "Update failed");
+  }
+
+  return json.data;
 };

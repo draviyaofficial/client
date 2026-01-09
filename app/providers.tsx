@@ -5,6 +5,7 @@ import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import { ReactNode, useState } from "react";
 import { PrivyProvider } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
+import AuthSync from "@/components/AuthSync";
 
 export default function Providers({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -37,6 +38,7 @@ export default function Providers({ children }: { children: ReactNode }) {
       }}
     >
       <QueryClientProvider client={queryClient}>
+        <AuthSync />
         <GoogleReCaptchaProvider
           reCaptchaKey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY as string}
           scriptProps={{

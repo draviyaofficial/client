@@ -7,16 +7,75 @@ import {
   Shield,
   Bell,
   User,
-  Eye,
-  EyeOff,
+  Copy,
+  Check,
   Save,
   AlertTriangle,
   X,
 } from "lucide-react";
 
+import { usePrivy } from "@privy-io/react-auth";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { updateUserFn, fetchMeFn } from "@/services/auth/model/api/mutations";
+import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
+
 export default function SettingsPage() {
-  const { data: user } = useUser();
-  const [showWalletAddress, setShowWalletAddress] = useState(false);
+  const { data: user, isLoading: isUserLoading } = useUser();
+  const { getAccessToken, authenticated } = usePrivy();
+
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [country, setCountry] = useState("");
+  const [email, setEmail] = useState("");
+
+  const { data: dbUser, isLoading: isDbUserLoading } = useQuery({
+    queryKey: ["me"],
+    queryFn: async () => {
+      const token = await getAccessToken();
+      if (!token) return null;
+      return fetchMeFn(token);
+    },
+    enabled: authenticated,
+  });
+
+  const isLoading = isUserLoading || isDbUserLoading;
+
+  // Sync state with user data when available
+  React.useEffect(() => {
+    if (dbUser) {
+      setFirstName(dbUser.firstName || "");
+      setLastName(dbUser.lastName || "");
+      setCountry(dbUser.country || "");
+      setEmail(dbUser.email || "");
+    }
+    // If dbUser is not yet loaded or empty, we could fallback to `user` (Privy user)
+    // but typically `dbUser` is the source of truth for these profile fields.
+    // We can initialize email from `user` if `dbUser` is missing.
+    else if (user) {
+      // Try to parse name if available and not set
+      // But user requested "initially there would be no name" if not set in DB
+      setEmail(user.email || "");
+    }
+  }, [dbUser, user]);
+
+  const { mutate: updateProfile, isPending } = useMutation({
+    mutationFn: async () => {
+      const token = await getAccessToken();
+      if (!token) throw new Error("No token");
+
+      return updateUserFn({ firstName, lastName, country }, token);
+    },
+    onSuccess: () => {
+      toast.success("Profile updated successfully");
+    },
+    onError: (err) => {
+      toast.error("Failed to update profile");
+      console.error(err);
+    },
+  });
+
+  const [copied, setCopied] = useState(false);
   const [notifications, setNotifications] = useState({
     email: true,
     push: false,
@@ -25,138 +84,237 @@ export default function SettingsPage() {
   });
   const [kycStatus] = useState("pending"); // Mock KYC status
 
-  const mockWalletAddress = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e";
-  const maskedAddress = `${mockWalletAddress.slice(
-    0,
-    6
-  )}...${mockWalletAddress.slice(-4)}`;
+  const handleCopy = () => {
+    const address = dbUser?.walletAddress || user?.walletAddress;
+    if (address) {
+      navigator.clipboard.writeText(address);
+      setCopied(true);
+      toast.success("Wallet address copied to clipboard");
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-xl p-10 space-y-12">
+        {/* Header Skeleton */}
+        <div className="space-y-2">
+          <Skeleton className="h-12 w-48" />
+          <Skeleton className="h-6 w-96" />
+        </div>
+
+        {/* Profile Skeleton */}
+        <div className="space-y-6">
+          <Skeleton className="h-8 w-48" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+            <div className="md:col-span-2 space-y-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+            <div className="md:col-span-2 space-y-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <Skeleton className="h-10 w-32" />
+          </div>
+        </div>
+
+        {/* Wallet Skeleton */}
+        <div className="space-y-6">
+          <Skeleton className="h-8 w-48" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-14 w-full" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-8">
+    <div className="bg-white rounded-xl p-10 space-y-12">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900">
-            Settings
-          </h1>
-          <p className="text-zinc-500 mt-1">
-            Manage your account preferences and security settings.
-          </p>
-        </div>
+      <div>
+        <h1 className="text-5xl font-semibold tracking-tight text-zinc-900">
+          Settings
+        </h1>
+        <p className="text-zinc-400 mt-1 text-lg">
+          Manage your account preferences and security settings.
+        </p>
       </div>
 
       {/* Profile Settings */}
-      <div className="rounded-xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
-        <div className="border-b border-zinc-100 bg-zinc-50/50 px-6 py-4">
-          <h2 className="font-semibold text-zinc-900 flex items-center gap-2">
-            <User className="h-5 w-5" />
+      <section className="space-y-6">
+        <div className="flex items-center gap-2 border-b border-zinc-100 pb-4">
+          <User className="h-6 w-6 text-zinc-400" />
+          <h2 className="text-2xl font-medium text-zinc-900">
             Profile Information
           </h2>
         </div>
 
-        <div className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-2">
-                Full Name
-              </label>
-              <input
-                type="text"
-                defaultValue={user?.name}
-                className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                defaultValue={user?.email}
-                className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 mb-2">
+              First Name
+            </label>
+            <input
+              type="text"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="Enter your first name"
+              className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+            />
           </div>
-
-          <div className="flex justify-end">
-            <button className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors">
-              <Save className="h-4 w-4" />
-              Save Changes
-            </button>
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 mb-2">
+              Last Name
+            </label>
+            <input
+              type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="Enter your last name"
+              className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-zinc-700 mb-2">
+              Email Address
+            </label>
+            <input
+              type="email"
+              value={email}
+              disabled
+              className="w-full px-4 py-3 border border-zinc-200 rounded-lg bg-zinc-50 text-zinc-500 cursor-not-allowed"
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-zinc-700 mb-2">
+              Country
+            </label>
+            <input
+              type="text"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              placeholder="Enter your country"
+              className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+            />
           </div>
         </div>
-      </div>
+
+        <div className="flex justify-end pt-4">
+          <button
+            onClick={() => updateProfile()}
+            disabled={isPending}
+            className="flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-3 text-sm font-medium text-white hover:bg-indigo-700 transition-colors disabled:opacity-50"
+          >
+            <Save className="h-4 w-4" />
+            {isPending ? "Saving..." : "Save Changes"}
+          </button>
+        </div>
+      </section>
 
       {/* Wallet Settings */}
-      <div className="rounded-xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
-        <div className="border-b border-zinc-100 bg-zinc-50/50 px-6 py-4">
-          <h2 className="font-semibold text-zinc-900 flex items-center gap-2">
-            <Wallet className="h-5 w-5" />
+      <section className="space-y-6">
+        <div className="flex items-center gap-2 border-b border-zinc-100 pb-4">
+          <Wallet className="h-6 w-6 text-zinc-400" />
+          <h2 className="text-2xl font-medium text-zinc-900">
             Wallet Information
           </h2>
         </div>
 
-        <div className="p-6 space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-zinc-700 mb-2">
-              Connected Wallet
-            </label>
-            <div className="flex items-center gap-3 p-3 bg-zinc-50 rounded-lg">
-              <Wallet className="h-5 w-5 text-zinc-600" />
-              <span className="font-mono text-sm text-zinc-900">
-                {showWalletAddress ? mockWalletAddress : maskedAddress}
-              </span>
+        <div className="grid grid-cols-1 gap-6">
+          <label className="block text-sm font-medium text-zinc-700 mb-2">
+            Connected Wallet
+          </label>
+          <div className="flex items-center gap-3 p-4 bg-zinc-50 rounded-lg border border-zinc-100">
+            <Wallet className="h-5 w-5 text-zinc-600" />
+            <span className="font-mono text-sm text-zinc-900">
+              {dbUser?.walletAddress || user?.walletAddress ? (
+                `${(dbUser?.walletAddress || user?.walletAddress || "").slice(
+                  0,
+                  6
+                )}...${(
+                  dbUser?.walletAddress ||
+                  user?.walletAddress ||
+                  ""
+                ).slice(-4)}`
+              ) : (
+                <span className="text-zinc-400 italic">
+                  No wallet connected
+                </span>
+              )}
+            </span>
+            {(dbUser?.walletAddress || user?.walletAddress) && (
               <button
-                onClick={() => setShowWalletAddress(!showWalletAddress)}
-                className="ml-auto text-zinc-400 hover:text-zinc-600"
+                onClick={handleCopy}
+                className="ml-auto text-zinc-400 hover:text-zinc-600 transition-colors"
+                title="Copy wallet address"
               >
-                {showWalletAddress ? (
-                  <EyeOff className="h-4 w-4" />
+                {copied ? (
+                  <Check className="h-4 w-4 text-green-500" />
                 ) : (
-                  <Eye className="h-4 w-4" />
+                  <Copy className="h-4 w-4" />
                 )}
               </button>
-            </div>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-zinc-50 rounded-lg">
-              <p className="text-2xl font-bold text-zinc-900">12</p>
-              <p className="text-sm text-zinc-500">Tokens Held</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center p-6 bg-zinc-50 rounded-xl border border-zinc-100">
+              <p className="text-3xl font-bold text-zinc-900">0</p>
+              <p className="text-sm text-zinc-500 mt-1">Tokens Held</p>
             </div>
-            <div className="text-center p-4 bg-zinc-50 rounded-lg">
-              <p className="text-2xl font-bold text-zinc-900">$12.4K</p>
-              <p className="text-sm text-zinc-500">Portfolio Value</p>
+            <div className="text-center p-6 bg-zinc-50 rounded-xl border border-zinc-100">
+              <p className="text-3xl font-bold text-zinc-900">$0.00</p>
+              <p className="text-sm text-zinc-500 mt-1">Portfolio Value</p>
             </div>
-            <div className="text-center p-4 bg-zinc-50 rounded-lg">
-              <p className="text-2xl font-bold text-zinc-900">89</p>
-              <p className="text-sm text-zinc-500">Transactions</p>
+            <div className="text-center p-6 bg-zinc-50 rounded-xl border border-zinc-100">
+              <p className="text-3xl font-bold text-zinc-900">0</p>
+              <p className="text-sm text-zinc-500 mt-1">Transactions</p>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* KYC Status */}
-      <div className="rounded-xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
-        <div className="border-b border-zinc-100 bg-zinc-50/50 px-6 py-4">
-          <h2 className="font-semibold text-zinc-900 flex items-center gap-2">
-            <Shield className="h-5 w-5" />
+      <section className="space-y-6">
+        <div className="flex items-center gap-2 border-b border-zinc-100 pb-4">
+          <Shield className="h-6 w-6 text-zinc-400" />
+          <h2 className="text-2xl font-medium text-zinc-900">
             Verification & KYC
           </h2>
         </div>
 
-        <div className="p-6">
-          <div className="flex items-center justify-between">
+        <div className="rounded-xl border border-zinc-200 p-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <p className="font-medium text-zinc-900">Identity Verification</p>
-              <p className="text-sm text-zinc-500 mt-1">
+              <p className="text-lg font-medium text-zinc-900">
+                Identity Verification
+              </p>
+              <p className="text-zinc-500 mt-1 max-w-xl">
                 Complete KYC to unlock higher investment limits and additional
                 features.
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <div
-                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
                   kycStatus === "verified"
                     ? "text-green-700 bg-green-50"
                     : kycStatus === "pending"
@@ -183,18 +341,18 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Notification Preferences */}
-      <div className="rounded-xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
-        <div className="border-b border-zinc-100 bg-zinc-50/50 px-6 py-4">
-          <h2 className="font-semibold text-zinc-900 flex items-center gap-2">
-            <Bell className="h-5 w-5" />
+      <section className="space-y-6">
+        <div className="flex items-center gap-2 border-b border-zinc-100 pb-4">
+          <Bell className="h-6 w-6 text-zinc-400" />
+          <h2 className="text-2xl font-medium text-zinc-900">
             Notification Preferences
           </h2>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="space-y-6">
           {[
             {
               key: "email",
@@ -219,7 +377,7 @@ export default function SettingsPage() {
                 "Receive promotional offers and new feature announcements",
             },
           ].map(({ key, label, description }) => (
-            <div key={key} className="flex items-center justify-between">
+            <div key={key} className="flex items-center justify-between py-2">
               <div>
                 <p className="font-medium text-zinc-900">{label}</p>
                 <p className="text-sm text-zinc-500">{description}</p>
@@ -241,7 +399,7 @@ export default function SettingsPage() {
             </div>
           ))}
         </div>
-      </div>
+      </section>
 
       {/* Danger Zone */}
       <div className="rounded-xl border border-red-200 bg-red-50 shadow-sm overflow-hidden">
