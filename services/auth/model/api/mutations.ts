@@ -145,3 +145,37 @@ export const updateUserFn = async (
 
   return json.data;
 };
+
+// =======================
+//   ONBOARDING FUNCTIONS
+// =======================
+
+export interface CreateApplicationInput {
+  name: string;
+  description: string;
+  contactNumber: string;
+  emailAddress: string;
+  socials: { platform: string; url: string }[];
+}
+
+export const createApplicationFn = async (
+  data: CreateApplicationInput,
+  token: string
+) => {
+  const response = await fetch(`${API_URL}/v1/creator-onboarding`, {
+    method: "POST",
+    headers: {
+      ...defaultHeaders,
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  const json: BackendResponse<any> = await response.json();
+
+  if (!response.ok || !json.ok) {
+    throw new Error(json.message || "Application submission failed");
+  }
+
+  return json.data;
+};

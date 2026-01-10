@@ -4,14 +4,7 @@ import React, { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "motion/react";
-import {
-  User,
-  Coins,
-  Share2,
-  FileText,
-  CheckCircle2,
-  Loader2,
-} from "lucide-react";
+import { User, Share2, CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner"; // Assuming you have sonner installed
 
 // Imports from our refactored structure
@@ -22,15 +15,12 @@ import {
   onboardingSchema,
   OnboardingFormData,
   step1Schema,
-  step2Schema,
   step3Schema,
-  step4Schema,
 } from "@/lib/schemas/onboarding-schema";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Controller } from "react-hook-form";
 import { CustomFormField } from "@/components/ui/custom-form-field";
-import DocumentsStep from "@/components/onboarding/steps/documents";
 import StepReview from "@/components/onboarding/steps/review";
 
 // Configuration for steps
@@ -47,15 +37,6 @@ const STEPS = [
   },
   {
     id: 2,
-    title: "Token Blueprint",
-    description: "Shape your token’s purpose, story, and economic vibe.",
-    longDescription:
-      "Define your token name, symbol, pitch, funding goal, and supply for your IPO. This is where you set the narrative behind your creator token and why fans should back you.",
-    icon: Coins,
-    schema: step2Schema,
-  },
-  {
-    id: 3,
     title: "Social Proof",
     description: "Connect your real audience — show us the clout.",
     longDescription:
@@ -64,16 +45,7 @@ const STEPS = [
     schema: step3Schema,
   },
   {
-    id: 4,
-    title: "Verification Check",
-    description: "Upload documents and prove you're the real deal.",
-    longDescription:
-      "Submit identity documents and any necessary creator/business proofs. This keeps the platform safe, legit, and prevents impersonation or fake creator launches.",
-    icon: FileText,
-    schema: step4Schema,
-  },
-  {
-    id: 5,
+    id: 3,
     title: "Final Review",
     description: "Look everything over before going live.",
     longDescription:
@@ -83,19 +55,27 @@ const STEPS = [
   },
 ];
 
+import { usePrivy } from "@privy-io/react-auth";
+import { useRouter } from "next/navigation";
+import { createApplicationFn } from "@/services/auth/model/api/mutations";
+
 export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { getAccessToken } = usePrivy();
+  const router = useRouter();
 
   // 1. Initialize Form with Combined Schema
   const methods = useForm<OnboardingFormData>({
     resolver: zodResolver(onboardingSchema),
     mode: "onChange",
     defaultValues: {
-      category: "artist",
       socials: [{ platform: "twitter", handle: "", url: "" }],
-      documents: [],
       contentOwnershipDeclared: undefined,
+      phoneNumber: "",
+      email: "",
+      fullName: "",
+      bio: "",
     },
   });
 
@@ -126,10 +106,32 @@ export default function OnboardingPage() {
   // 3. Submission Logic
   const onSubmit = async (data: OnboardingFormData) => {
     setIsSubmitting(true);
-    await new Promise((r) => setTimeout(r, 2000)); // Mock API
-    console.log("Submitted:", data);
-    toast.success("Application Submitted successfully!");
-    setIsSubmitting(false);
+    try {
+      const token = await getAccessToken();
+      if (!token) {
+        toast.error("You must be logged in to submit an application");
+        return;
+      }
+
+      await createApplicationFn(
+        {
+          name: data.fullName,
+          description: data.bio,
+          contactNumber: data.phoneNumber!, // Validated by schema to be present
+          emailAddress: data.email,
+          socials: data.socials,
+        },
+        token
+      );
+
+      toast.success("Application Submitted successfully!");
+      router.push("/dashboard"); // Redirect after success
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Failed to submit application");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -174,46 +176,9 @@ export default function OnboardingPage() {
                   {/* Step Switcher */}
                   {currentStep === 1 && <StepCreatorDetails />}
 
-                  {currentStep === 2 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <CustomFormField
-                        control={control}
-                        name="tokenName"
-                        label="Token Name"
-                      />
-                      <CustomFormField
-                        control={control}
-                        name="tokenSymbol"
-                        label="Symbol"
-                        className="uppercase"
-                      />
-                      <CustomFormField
-                        control={control}
-                        name="tokenPitch"
-                        label="Pitch"
-                        fieldType="textarea"
-                        className="col-span-2"
-                      />
-                      <CustomFormField
-                        control={control}
-                        name="fundingGoal"
-                        label="Funding Goal ($)"
-                        type="number"
-                      />
-                      <CustomFormField
-                        control={control}
-                        name="icoSupply"
-                        label="Initial Supply"
-                        type="number"
-                      />
-                    </div>
-                  )}
+                  {currentStep === 2 && <StepSocials />}
 
-                  {currentStep === 3 && <StepSocials />}
-
-                  {currentStep === 4 && <DocumentsStep />}
-
-                  {currentStep === 5 && (
+                  {currentStep === 3 && (
                     <div className="space-y-8">
                       {/* 1. The Overview Component */}
                       <StepReview />

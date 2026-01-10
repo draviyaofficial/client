@@ -24,20 +24,17 @@ export const StepCreatorDetails = () => {
         />
         <CustomFormField
           control={control}
-          name="creatorHandle"
-          label="Handle"
-          placeholder="janedoe"
+          name="email"
+          label="Email Address"
+          placeholder="jane@example.com"
+        />
+        <CustomFormField
+          control={control}
+          name="phoneNumber"
+          label="Phone Number"
+          placeholder="+1234567890"
         />
       </div>
-
-      <CustomFormField
-        control={control}
-        name="category"
-        label="Category"
-        fieldType="select"
-        options={CATEGORIES}
-        placeholder="Select a category"
-      />
 
       <CustomFormField
         control={control}
@@ -46,14 +43,6 @@ export const StepCreatorDetails = () => {
         fieldType="textarea"
         placeholder="Tell your story..."
         description="Min 50 characters"
-      />
-
-      <CustomFormField
-        control={control}
-        name="wallet"
-        label="Solana Wallet"
-        placeholder="Base58 public key..."
-        className="font-mono"
       />
     </div>
   );

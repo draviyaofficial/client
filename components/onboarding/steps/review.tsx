@@ -3,7 +3,7 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { OnboardingFormData } from "@/lib/schemas/onboarding-schema";
-import { User, Coins, Share2, FileText, ExternalLink } from "lucide-react";
+import { User, Share2, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Helper for displaying a label-value row
@@ -60,15 +60,7 @@ const StepReview = () => {
       {/* 1. Identity Section */}
       <ReviewSection title="Creator Identity" icon={User}>
         <ReviewRow label="Full Name" value={data.fullName} />
-        <ReviewRow label="Handle" value={`@${data.creatorHandle}`} />
-        <ReviewRow
-          label="Category"
-          value={<span className="capitalize">{data.category}</span>}
-        />
-        <ReviewRow
-          label="Wallet"
-          value={<span className="font-mono text-xs">{data.wallet}</span>}
-        />
+        <ReviewRow label="Phone" value={data.phoneNumber} />
         <ReviewRow
           label="Bio"
           value={data.bio}
@@ -76,30 +68,7 @@ const StepReview = () => {
         />
       </ReviewSection>
 
-      {/* 2. Token Blueprint */}
-      <ReviewSection title="Token Blueprint" icon={Coins}>
-        <ReviewRow label="Token Name" value={data.tokenName} />
-        <ReviewRow label="Symbol" value={data.tokenSymbol} />
-        <ReviewRow
-          label="Funding Goal"
-          value={
-            data.fundingGoal
-              ? `$${Number(data.fundingGoal).toLocaleString()}`
-              : "-"
-          }
-        />
-        <ReviewRow
-          label="Initial Supply"
-          value={data.icoSupply ? Number(data.icoSupply).toLocaleString() : "-"}
-        />
-        <ReviewRow
-          label="Pitch"
-          value={data.tokenPitch}
-          className="flex-col sm:items-start sm:text-left"
-        />
-      </ReviewSection>
-
-      {/* 3. Socials */}
+      {/* 2. Socials */}
       <ReviewSection title="Social Connections" icon={Share2}>
         {data.socials && data.socials.length > 0 ? (
           data.socials.map((social, index) => (
@@ -122,30 +91,6 @@ const StepReview = () => {
           ))
         ) : (
           <p className="text-zinc-400 text-sm italic">No socials linked.</p>
-        )}
-      </ReviewSection>
-
-      {/* 4. Documents */}
-      <ReviewSection title="Verification Documents" icon={FileText}>
-        {data.documents && data.documents.length > 0 ? (
-          data.documents.map((doc, index) => (
-            <div
-              key={index}
-              className="py-2 border-b border-zinc-100 last:border-0"
-            >
-              <div className="flex justify-between">
-                <span className="capitalize text-zinc-800 font-medium text-sm">
-                  {doc.type.replace(/_/g, " ")}
-                </span>
-                <span className="text-zinc-400 text-xs">Uploaded</span>
-              </div>
-              <div className="text-zinc-500 text-xs truncate mt-1">
-                {doc.fileUrl}
-              </div>
-            </div>
-          ))
-        ) : (
-          <p className="text-zinc-400 text-sm italic">No documents uploaded.</p>
         )}
       </ReviewSection>
     </div>
