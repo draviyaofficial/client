@@ -84,6 +84,8 @@ const HowItWorks = () => {
                 <img
                   src={step.icon}
                   className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 shrink-0"
+                  alt={step.title}
+                  loading="lazy"
                 />
                 <span className="text-zinc-900 font-semibold text-sm sm:text-base lg:text-lg">
                   {step.title}
@@ -101,7 +103,8 @@ const HowItWorks = () => {
           <img
             src="/images/howitworks/bg.png"
             className="w-full h-full object-cover"
-            alt="Background"
+            alt="How It Works Background"
+            loading="lazy"
           />
           {/* Dark overlay for better text contrast */}
           <div className="absolute inset-0 bg-black/30" />
@@ -119,6 +122,7 @@ const HowItWorks = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.45 }}
               alt={STEPS[currentStep].title}
+              loading="lazy"
             />
           </div>
 

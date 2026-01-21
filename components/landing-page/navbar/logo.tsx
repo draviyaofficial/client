@@ -11,15 +11,17 @@ const Logo = () => (
     <Link href="/">
       <img
         src="/images/logo/logo-icon.jpeg"
-        alt="logo"
+        alt="Draviya Logo Icon"
         className="h-8 rounded-md"
+        loading="eager"
       />
     </Link>
     <Link href="/">
       <img
         src="/images/logo/logo-name-light.png"
-        alt="logo-text"
+        alt="Draviya Logo Text"
         className="h-6"
+        loading="eager"
       />
     </Link>
   </motion.div>

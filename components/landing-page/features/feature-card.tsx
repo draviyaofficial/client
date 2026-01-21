@@ -16,7 +16,12 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
   return (
     <div className="relative h-[300px] sm:h-[400px] lg:h-[500px] xl:h-[600px] w-full border border-zinc-800 rounded-2xl sm:rounded-3xl lg:rounded-4xl overflow-hidden">
       {/* Background image */}
-      <img src={img} alt={title} className="w-full h-full object-cover" />
+      <img
+        src={img}
+        alt={title}
+        className="w-full h-full object-cover"
+        loading="lazy"
+      />
 
       {/* Overlay */}
       <div className="absolute inset-0 bg-linear-to-t from-black via-black/40 to-transparent" />
@@ -27,6 +32,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
           src={icon}
           alt={title}
           className="h-6 w-6 sm:h-8 sm:w-8 lg:h-10 lg:w-10"
+          loading="lazy"
         />
         <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-semibold leading-tight">
           {title}

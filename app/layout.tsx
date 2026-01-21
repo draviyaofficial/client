@@ -19,10 +19,71 @@ const figtree = Figtree({
   subsets: ["latin"],
 });
 
+export const viewport = {
+  themeColor: "#000000",
+};
+
 export const metadata: Metadata = {
-  title: "Draviya",
+  metadataBase: new URL("https://draviya.com"),
+  title: {
+    default: "Draviya | Invest in Creators",
+    template: "%s | Draviya",
+  },
   description:
     "We’re turning your favorite creators into Investable tokens(similar to stocks). Buy, sell, and grow with the creators you believe in.",
+  keywords: [
+    "Creator Economy",
+    "Invest in Creators",
+    "Creator Tokens",
+    "Draviya",
+    "Social Tokens",
+  ],
+  authors: [{ name: "Draviya Team" }],
+  creator: "Draviya",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://draviya.com",
+    title: "Draviya | Invest in Creators",
+    description:
+      "We’re turning your favorite creators into Investable tokens(similar to stocks). Buy, sell, and grow with the creators you believe in.",
+    siteName: "Draviya",
+    images: [
+      {
+        url: "/og-image.jpg", // Needs to be added to public folder later if not present
+        width: 1200,
+        height: 630,
+        alt: "Draviya - Invest in Creators",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Draviya | Invest in Creators",
+    description:
+      "We’re turning your favorite creators into Investable tokens(similar to stocks). Buy, sell, and grow with the creators you believe in.",
+    images: ["/og-image.jpg"],
+    creator: "@draviya",
+  },
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout({
@@ -39,6 +100,25 @@ export default function RootLayout({
           {children}
           <Toaster />
         </Providers>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "Draviya",
+              url: "https://draviya.com",
+              logo: "https://draviya.com/images/logo/logo-icon.jpeg",
+              sameAs: [
+                "https://x.com/Draviyaofficial",
+                "https://www.instagram.com/draviyaofficial",
+                "https://github.com/draviyaofficial",
+              ],
+              description:
+                "We’re turning your favorite creators into Investable tokens(similar to stocks). Buy, sell, and grow with the creators you believe in.",
+            }),
+          }}
+        />
       </body>
     </html>
   );

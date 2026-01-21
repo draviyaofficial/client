@@ -1,5 +1,10 @@
 import React from "react";
-import { ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown } from "lucide-react";
+import {
+  ArrowUpRight,
+  ArrowDownRight,
+  TrendingUp,
+  TrendingDown,
+} from "lucide-react";
 
 interface Token {
   id: string;
@@ -56,24 +61,37 @@ export function TokenTable({ tokens }: TokenTableProps) {
                       src={token.avatar}
                       alt={token.creator}
                       className="h-8 w-8 rounded-full"
+                      loading="lazy"
                     />
-                    <span className="font-medium text-zinc-900">{token.creator}</span>
+                    <span className="font-medium text-zinc-900">
+                      {token.creator}
+                    </span>
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-sm text-zinc-500">{token.category}</span>
+                  <span className="text-sm text-zinc-500">
+                    {token.category}
+                  </span>
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <span className="font-medium text-zinc-900">{token.price}</span>
+                  <span className="font-medium text-zinc-900">
+                    {token.price}
+                  </span>
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-1">
-                    {token.changePercent.startsWith('+') ? (
+                    {token.changePercent.startsWith("+") ? (
                       <TrendingUp className="h-4 w-4 text-green-600" />
                     ) : (
                       <TrendingDown className="h-4 w-4 text-red-600" />
                     )}
-                    <span className={`font-medium ${token.changePercent.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
+                    <span
+                      className={`font-medium ${
+                        token.changePercent.startsWith("+")
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    >
                       {token.changePercent}
                     </span>
                   </div>
@@ -82,7 +100,9 @@ export function TokenTable({ tokens }: TokenTableProps) {
                   <span className="text-sm text-zinc-600">{token.volume}</span>
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <span className="text-sm text-zinc-600">{token.marketCap}</span>
+                  <span className="text-sm text-zinc-600">
+                    {token.marketCap}
+                  </span>
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
@@ -102,5 +122,3 @@ export function TokenTable({ tokens }: TokenTableProps) {
     </div>
   );
 }
-
-

@@ -137,6 +137,7 @@ const SocialButton = ({
       alt={`${label} logo`}
       className="h-6 w-6"
       onError={(e) => (e.currentTarget.style.display = "none")}
+      loading="lazy"
     />
     {label}
   </button>

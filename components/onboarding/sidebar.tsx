@@ -18,8 +18,9 @@ export const OnboardingSidebar = ({ steps, currentStep }: SidebarProps) => {
     <aside className="hidden lg:flex w-2/5 max-w-xl flex-col justify-between border-r border-slate-100 relative overflow-hidden rounded-4xl">
       <img
         src="/images/howitworks/bg.png"
-        alt=""
+        alt="Onboarding Background"
         className="w-full h-full object-cover absolute top-0"
+        loading="lazy"
       />
 
       <div className="relative z-10 p-12">
@@ -27,17 +28,19 @@ export const OnboardingSidebar = ({ steps, currentStep }: SidebarProps) => {
           <div className="flex gap-3 items-center mb-10">
             <img
               src="/images/logo/logo-icon.jpeg"
-              alt="Logo"
+              alt="Draviya Logo"
               className="h-10 w-10 md:h-12 md:w-12 rounded-xl"
               onError={(e) =>
                 (e.currentTarget.src = "https://placehold.co/48x48?text=L")
               }
+              loading="lazy"
             />
             <img
               src="/images/logo/logo-name-light.png"
-              alt="Brand"
+              alt="Draviya Brand"
               className="h-6 md:h-8"
               onError={(e) => (e.currentTarget.style.display = "none")}
+              loading="lazy"
             />
           </div>
           <h1 className="text-4xl font-semibold text-white">

@@ -25,8 +25,9 @@ const MiniCard: React.FC<MiniCardProps> = ({
               style={{
                 transform: `rotate(${randomRotation}deg)`,
               }}
-              alt=""
+              alt={title || "Mini Card Image"}
               className="h-12 w-12 sm:h-16 sm:w-16 lg:h-20 lg:w-20 rounded-lg sm:rounded-xl border border-zinc-400 shadow-lg shadow-black rotate-2"
+              loading="lazy"
             />
           );
         })}

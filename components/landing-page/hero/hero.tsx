@@ -34,6 +34,7 @@ const Hero = () => {
           className="masked-img"
           src="/images/hero/hero-image.jpg"
           alt="Hero Background"
+          loading="eager"
         />
 
         {/* Mask/Overlay */}
@@ -67,8 +68,9 @@ const Hero = () => {
         >
           <img
             src="/images/hero/dashboard.png"
-            alt="Dashboard"
+            alt="Dashboard Interface"
             className="h-[250px] sm:h-[400px] md:h-[500px] lg:h-[700px] rounded-xl relative z-10"
+            loading="eager"
           />
 
           {/* Glow after reveal */}
@@ -109,6 +111,7 @@ const Hero = () => {
                       src={social.icon}
                       alt={social.title}
                       className="h-7 w-7"
+                      loading="lazy"
                     />
                   </div>
                 </Link>

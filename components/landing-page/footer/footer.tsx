@@ -40,8 +40,9 @@ const Footer = () => {
     <section className="w-full h-screen p-2 sm:p-3 lg:p-4 relative overflow-x-hidden">
       <img
         src="/images/footer/bg.png"
-        alt=""
+        alt="Footer Background"
         className="w-full h-full object-cover object-center rounded-2xl sm:rounded-3xl lg:rounded-4xl"
+        loading="lazy"
       />
       <div className="absolute text-white inset-0 p-2 sm:p-3 lg:p-4 w-full h-full">
         <div className="h-[75%] sm:h-[78%] lg:h-[80%] xl:h-[82%] w-full pt-8 sm:pt-12 lg:pt-16 xl:pt-20 2xl:pt-24">
@@ -67,6 +68,7 @@ const Footer = () => {
                           src={social.icon}
                           alt={social.title}
                           className="h-4 w-4 sm:h-5 sm:w-5"
+                          loading="lazy"
                         />
                       </div>
                     </Link>
