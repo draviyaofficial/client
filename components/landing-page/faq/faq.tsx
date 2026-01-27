@@ -54,12 +54,12 @@ const FAQ = () => {
         <h3 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-medium text-zinc-900 leading-tight">
           Got questions?
           <br className="hidden sm:block" />
-          <span className="sm:hidden"> </span>We've got answers.
+          <span className="sm:hidden"> </span>We&#39;ve got answers.
         </h3>
 
         <div className="flex flex-col gap-6 sm:gap-8 lg:gap-10 max-w-full lg:max-w-md text-left lg:text-right">
           <p className="text-base sm:text-lg lg:text-xl text-zinc-600 leading-relaxed">
-            Here's everything you need to know before getting started.
+            Here&#39;s everything you need to know before getting started.
           </p>
 
           <Link

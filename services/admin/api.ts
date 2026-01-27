@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+import { API_URL } from "../apiConfig";
 
 const defaultHeaders = {
   "Content-Type": "application/json",
@@ -34,10 +34,19 @@ interface FetchApplicationsParams {
   timeRange?: string;
 }
 
+/**
+ * Fetches creator applications.
+ * @param token - Admin token.
+ * @param params - Query parameters.
+ * @returns List of applications.
+ */
 export const fetchApplicationsFn = async (
   token: string,
-  params: FetchApplicationsParams = {}
-): Promise<{ data: CreatorApplication[]; meta: any }> => {
+  params: FetchApplicationsParams = {},
+): Promise<{
+  data: CreatorApplication[];
+  meta: { total: number; page: number; limit: number; totalPages: number };
+}> => {
   const query = new URLSearchParams({
     page: (params.page || 1).toString(),
     limit: (params.limit || 20).toString(),
@@ -54,7 +63,10 @@ export const fetchApplicationsFn = async (
     },
   });
 
-  const json: BackendResponse<any> = await response.json();
+  const json: BackendResponse<{
+    data: CreatorApplication[];
+    meta: { total: number; page: number; limit: number; totalPages: number };
+  }> = await response.json();
 
   if (!response.ok || !json.ok) {
     throw new Error(json.message || "Failed to fetch applications");
@@ -63,12 +75,18 @@ export const fetchApplicationsFn = async (
   return json.data;
 };
 
+/**
+ * Updates application state.
+ * @param token - Admin token.
+ * @param applicationId - ID of application.
+ * @param state - New state.
+ */
 export const updateApplicationStateFn = async (
   token: string,
   applicationId: string,
   state: string,
   sector?: string,
-  rejectionReason?: string
+  rejectionReason?: string,
 ) => {
   const response = await fetch(
     `${API_URL}/v1/creator-onboarding/${applicationId}`,
@@ -79,10 +97,10 @@ export const updateApplicationStateFn = async (
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ state, sector, rejectionReason }),
-    }
+    },
   );
 
-  const json: BackendResponse<any> = await response.json();
+  const json: BackendResponse<CreatorApplication> = await response.json();
 
   if (!response.ok || !json.ok) {
     throw new Error(json.message || "Failed to update application state");
@@ -114,8 +132,13 @@ export interface EligibleCreator {
   } | null;
 }
 
+/**
+ * Gets creators eligible for token launch.
+ * @param token - Admin token.
+ * @returns List of eligible creators.
+ */
 export const getEligibleCreatorsFn = async (
-  token: string
+  token: string,
 ): Promise<EligibleCreator[]> => {
   const response = await fetch(`${API_URL}/v1/admin/eligible-creators`, {
     method: "GET",
@@ -144,6 +167,12 @@ export interface CreateIROInput {
   cliffPeriod: number;
 }
 
+/**
+ * Creates a new Initial Royalty Offering.
+ * @param token - Admin token.
+ * @param data - IRO creation data.
+ * @returns Object containing the created IRO ID.
+ */
 export const createIROFn = async (token: string, data: CreateIROInput) => {
   const response = await fetch(`${API_URL}/v1/admin/iro/create`, {
     method: "POST",
@@ -154,7 +183,7 @@ export const createIROFn = async (token: string, data: CreateIROInput) => {
     body: JSON.stringify(data),
   });
 
-  const json: BackendResponse<any> = await response.json();
+  const json: BackendResponse<{ id: string }> = await response.json();
 
   if (!response.ok || !json.ok) {
     throw new Error(json.message || "Failed to create IRO");

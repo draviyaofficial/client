@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export default function AdminIROPage() {
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusFilter] = useState<string>("all");
 
   const { data: iros, isLoading } = useQuery({
     queryKey: ["admin", "iros", statusFilter],

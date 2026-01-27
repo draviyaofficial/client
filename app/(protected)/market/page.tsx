@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, Filter, X } from "lucide-react";
+import { Search, Filter } from "lucide-react";
 import { TokenTable } from "@/components/dashboard/TokenTable";
 
 // Mock data
@@ -80,9 +80,12 @@ export default function MarketPage() {
   const [sortBy, setSortBy] = useState("marketCap");
 
   const filteredTokens = mockTokens.filter((token) => {
-    const matchesSearch = token.creator.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         token.category.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "All Categories" || token.category === selectedCategory;
+    const matchesSearch =
+      token.creator.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      token.category.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "All Categories" ||
+      token.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -172,7 +175,9 @@ export default function MarketPage() {
       {/* Token Table */}
       <div>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-zinc-900">Creator Tokens</h2>
+          <h2 className="text-xl font-semibold text-zinc-900">
+            Creator Tokens
+          </h2>
           <span className="text-sm text-zinc-500">
             {filteredTokens.length} of {mockTokens.length} tokens
           </span>
@@ -182,5 +187,3 @@ export default function MarketPage() {
     </div>
   );
 }
-
-

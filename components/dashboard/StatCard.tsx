@@ -1,28 +1,13 @@
 import React from "react";
-import { LucideIcon, ArrowRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ArrowRight } from "lucide-react";
 
 interface StatCardProps {
   title: string;
   value: string;
   change: string;
-  changeType: "positive" | "negative" | "neutral";
-  icon: LucideIcon;
 }
 
-export function StatCard({
-  title,
-  value,
-  change,
-  changeType,
-  icon: Icon,
-}: StatCardProps) {
-  const changeColor = {
-    positive: "text-green-600",
-    negative: "text-red-600",
-    neutral: "text-zinc-500",
-  };
-
+export function StatCard({ title, value, change }: StatCardProps) {
   return (
     <div
       className={`rounded-3xl ${

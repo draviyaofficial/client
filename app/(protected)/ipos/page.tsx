@@ -1,14 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Clock,
-  TrendingUp,
-  Search,
-  Filter,
-  Loader2,
-  AlertCircle,
-} from "lucide-react";
+import { Clock, Search, Filter, Loader2, AlertCircle } from "lucide-react";
+import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { listIROsFn, IRO } from "@/services/iro/api";
 
@@ -51,12 +45,9 @@ export default function IPOsPage() {
   const processedIROs =
     iros.map((iro: IRO) => {
       // Calculate progress, days left, etc.
-      const startTime = new Date(iro.startTime);
+
       const endTime = new Date(iro.endTime);
       const now = new Date();
-
-      const totalDuration = endTime.getTime() - startTime.getTime();
-      const elapsed = now.getTime() - startTime.getTime();
 
       // Simple progress calculation (time-based for now as we don't have sold amounts in response?)
       // The response structure needs to be checked. For now assuming we display it based on known data.
@@ -64,7 +55,7 @@ export default function IPOsPage() {
       // Looking at controller: returns token, user, etc.
 
       const daysLeft = Math.ceil(
-        (endTime.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+        (endTime.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
       );
 
       return {
@@ -192,9 +183,11 @@ export default function IPOsPage() {
               <div className="flex items-center gap-4 mb-4">
                 <div className="h-12 w-12 rounded-full bg-[#f9efe3] flex items-center justify-center text-zinc-900 font-semibold text-sm overflow-hidden">
                   {ipo.avatar ? (
-                    <img
+                    <Image
                       src={ipo.avatar}
                       alt={ipo.creatorName}
+                      width={48}
+                      height={48}
                       className="h-full w-full object-cover"
                     />
                   ) : (

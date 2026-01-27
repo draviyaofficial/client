@@ -4,6 +4,7 @@ import React from "react";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 
 export default function AuthLayout({
   children,
@@ -18,18 +19,22 @@ export default function AuthLayout({
       {/* --- TOP NAVIGATION (Shared) --- */}
       <div className="fixed top-0 w-full px-5 md:px-20 py-6 md:py-10 flex justify-between items-center z-20">
         <div className="flex gap-3 items-center">
-          <img
+          <Image
             src="/images/logo/logo-icon.jpeg"
             alt="Logo"
+            width={48}
+            height={48}
             className="h-10 w-10 md:h-12 md:w-12 rounded-xl"
             onError={(e) =>
               (e.currentTarget.src = "https://placehold.co/48x48?text=L")
             }
           />
-          <img
+          <Image
             src="/images/logo/logo-name-dark.png"
             alt="Brand"
-            className="h-6 md:h-8"
+            width={120}
+            height={32}
+            className="h-6 md:h-8 w-auto"
             onError={(e) => (e.currentTarget.style.display = "none")}
           />
         </div>
@@ -48,12 +53,14 @@ export default function AuthLayout({
       </div>
 
       {/* --- BACKGROUND IMAGES (Shared) --- */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/images/auth/bg-person.jpeg"
         alt=""
         className="w-1/2 h-full object-contain opacity-75 absolute top-0 left-10 pointer-events-none hidden lg:block"
         onError={(e) => (e.currentTarget.style.display = "none")}
       />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/images/auth/bg.jpeg"
         alt=""

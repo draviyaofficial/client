@@ -4,6 +4,7 @@ import HeroLogos from "./hero-logos";
 import { motion } from "motion/react";
 import HeroText from "./hero-text";
 import Link from "next/link";
+import NextImage from "next/image";
 import WaitlistForm from "../waitlist/waitlist-form";
 
 const SOCIALS = [
@@ -11,16 +12,19 @@ const SOCIALS = [
     title: "Twitter",
     icon: "/images/socials/twitter.png",
     link: "https://x.com/Draviyaofficial",
+    rotation: -6,
   },
   {
     title: "Instagram",
     icon: "/images/socials/instagram.png",
     link: "https://www.instagram.com/draviyaofficial",
+    rotation: 8,
   },
   {
     title: "GitHub",
     icon: "/images/socials/github.png",
     link: "https://github.com/draviyaofficial",
+    rotation: -4,
   },
 ];
 
@@ -30,11 +34,12 @@ const Hero = () => {
       {/* HERO TOP - Background + Floating Logos */}
       <div className="hero relative h-dvh w-dvw overflow-hidden">
         {/* Background image */}
-        <img
-          className="masked-img"
+        <NextImage
+          className="masked-img object-cover"
           src="/images/hero/hero-image.jpg"
           alt="Hero Background"
-          loading="eager"
+          fill
+          priority
         />
 
         {/* Mask/Overlay */}
@@ -66,11 +71,13 @@ const Hero = () => {
           }}
           className="relative"
         >
-          <img
+          <NextImage
             src="/images/hero/dashboard.png"
             alt="Dashboard Interface"
-            className="h-[250px] sm:h-[400px] md:h-[500px] lg:h-[700px] rounded-xl relative z-10"
-            loading="eager"
+            width={1200}
+            height={800}
+            className="h-[250px] sm:h-[400px] md:h-[500px] lg:h-[700px] w-auto rounded-xl relative z-10"
+            priority
           />
 
           {/* Glow after reveal */}
@@ -88,7 +95,7 @@ const Hero = () => {
 
       <div className="flex flex-col items-center justify-center my-30 gap-10">
         <h2 className="font-medium text-lg sm:text-2xl text-center">
-          You've been investing in creators emotionally.
+          You&apos;ve been investing in creators emotionally.
           <br /> Try financially.
         </h2>
         <div className="w-full max-w-2xl px-5">
@@ -97,21 +104,20 @@ const Hero = () => {
         <div className="flex flex-col gap-3 items-center">
           <div className="flex">
             {SOCIALS.map((social, index) => {
-              const randomRotation = Math.random() * 20 - 10;
-
               return (
                 <Link key={index} href={social.link}>
                   <div
                     className="p-3 border border-zinc-300 bg-white shadow-zinc-500 rounded-xl hover:-translate-y-2 duration-300 transition-all"
                     style={{
-                      transform: `rotate(${randomRotation}deg)`,
+                      transform: `rotate(${social.rotation}deg)`,
                     }}
                   >
-                    <img
+                    <NextImage
                       src={social.icon}
                       alt={social.title}
+                      width={28}
+                      height={28}
                       className="h-7 w-7"
-                      loading="lazy"
                     />
                   </div>
                 </Link>

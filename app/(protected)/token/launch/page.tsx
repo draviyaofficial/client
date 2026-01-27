@@ -26,7 +26,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -38,7 +37,7 @@ import {
   Users,
   Coins,
 } from "lucide-react";
-import Link from "next/link";
+import NextImage from "next/image";
 
 // Schema Validation
 const tokenSchema = z.object({
@@ -69,6 +68,7 @@ export default function TokenLaunchPage() {
 
   const [tickerAvailable, setTickerAvailable] = useState<boolean | null>(null);
   const [checkingTicker, setCheckingTicker] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   // Check for existing application
   const { data: existingToken, isLoading: isLoadingToken } = useQuery({
@@ -96,15 +96,14 @@ export default function TokenLaunchPage() {
   const { data: analytics, isLoading: isLoadingAnalytics } = useQuery({
     queryKey: ["token-analytics", existingToken?.id],
     queryFn: async () => {
-      // @ts-ignore
-      const mint = existingToken?.mintAddress;
-      if (!mint) return null;
-      return await getTokenAnalytics(mint);
+      if (!existingToken?.mintAddress) return null;
+      return await getTokenAnalytics(existingToken.mintAddress);
     },
     enabled: !!existingToken && existingToken.status === "APPROVED", // Only fetch if approved/minted
   });
 
   const form = useForm<TokenFormValues>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(tokenSchema) as any,
     defaultValues: {
       name: "",
@@ -124,7 +123,7 @@ export default function TokenLaunchPage() {
     register,
     handleSubmit,
     watch,
-    formState: { errors, isValid },
+    formState: { errors },
     trigger,
   } = form;
 
@@ -167,6 +166,7 @@ export default function TokenLaunchPage() {
     }, 500);
 
     return () => clearTimeout(delayDebounceFn);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [symbol]);
 
   const mutation = useMutation({
@@ -181,7 +181,7 @@ export default function TokenLaunchPage() {
       });
       queryClient.invalidateQueries({ queryKey: ["my-token-application"] });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Failed to submit application");
     },
   });
@@ -239,10 +239,17 @@ export default function TokenLaunchPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 {existingToken.logoUrl && (
-                  <img
-                    src={existingToken.logoUrl}
+                  <NextImage
+                    src={
+                      imgError
+                        ? "https://placehold.co/64x64?text=TOKEN"
+                        : existingToken.logoUrl
+                    }
                     alt={existingToken.symbol}
+                    width={64}
+                    height={64}
                     className="w-16 h-16 rounded-full shadow-sm"
+                    onError={() => setImgError(true)}
                   />
                 )}
                 <div>

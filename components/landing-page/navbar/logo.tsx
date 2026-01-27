@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import Link from "next/link";
+import NextImage from "next/image";
 
 const Logo = () => (
   <motion.div
@@ -9,19 +10,23 @@ const Logo = () => (
     className="flex gap-2 items-center"
   >
     <Link href="/">
-      <img
+      <NextImage
         src="/images/logo/logo-icon.jpeg"
         alt="Draviya Logo Icon"
-        className="h-8 rounded-md"
-        loading="eager"
+        width={32}
+        height={32}
+        className="h-8 w-auto rounded-md"
+        priority
       />
     </Link>
     <Link href="/">
-      <img
+      <NextImage
         src="/images/logo/logo-name-light.png"
         alt="Draviya Logo Text"
-        className="h-6"
-        loading="eager"
+        width={100}
+        height={24}
+        className="h-6 w-auto"
+        priority
       />
     </Link>
   </motion.div>

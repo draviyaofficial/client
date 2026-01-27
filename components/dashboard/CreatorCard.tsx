@@ -1,5 +1,5 @@
 import React from "react";
-import { Clock, TrendingUp } from "lucide-react";
+import { Clock } from "lucide-react";
 
 interface CreatorCardProps {
   id: string;
@@ -11,7 +11,6 @@ interface CreatorCardProps {
   raised: string;
   daysLeft: number;
   category: string;
-  avatar: string;
 }
 
 export function CreatorCard({
@@ -23,7 +22,6 @@ export function CreatorCard({
   raised,
   daysLeft,
   category,
-  avatar,
 }: CreatorCardProps) {
   return (
     <div className="rounded-3xl border border-zinc-200 bg-white p-6">

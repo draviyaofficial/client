@@ -7,8 +7,11 @@ interface BackendResponse<T> {
   data: T;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+import { API_URL } from "../../../apiConfig";
 
+/**
+ * Default headers for API requests.
+ */
 const defaultHeaders = {
   "Content-Type": "application/json",
 };
@@ -18,8 +21,13 @@ const defaultHeaders = {
 // =======================
 
 // --- LOGIN ---
+/**
+ * Authenticates a user with email and password.
+ * @param credentials - The user's login credentials.
+ * @returns The login response containing the user and session token.
+ */
 export const loginFn = async (
-  credentials: LoginInput
+  credentials: LoginInput,
 ): Promise<LoginResponse> => {
   const response = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
@@ -38,6 +46,11 @@ export const loginFn = async (
 };
 
 // --- REGISTER ---
+/**
+ * Registers a new user.
+ * @param data - The registration data.
+ * @returns The registered user object.
+ */
 export const registerFn = async (data: RegisterInput): Promise<User> => {
   const response = await fetch(`${API_URL}/auth/register`, {
     method: "POST",
@@ -56,6 +69,9 @@ export const registerFn = async (data: RegisterInput): Promise<User> => {
 };
 
 // --- LOGOUT ---
+/**
+ * Logs out the current user.
+ */
 export const logoutFn = async (): Promise<void> => {
   const response = await fetch(`${API_URL}/auth/logout`, {
     method: "POST",
@@ -69,7 +85,7 @@ export const logoutFn = async (): Promise<void> => {
     if (!response.ok || !json.ok) {
       throw new Error(json.message || "Logout failed");
     }
-  } catch (e) {
+  } catch {
     // If backend returns empty 200 body
     if (!response.ok) {
       throw new Error("Logout failed");
@@ -95,7 +111,7 @@ export const fetchMeFn = async (token: string): Promise<User | null> => {
     if (!json.ok || !json.data) return null;
 
     return json.data;
-  } catch (error) {
+  } catch {
     return null;
   }
 };
@@ -103,7 +119,7 @@ export const fetchMeFn = async (token: string): Promise<User | null> => {
 // --- SYNC PRIVY USER ---
 export const syncUserFn = async (
   userData: { privyId: string; email?: string; walletAddress?: string },
-  token: string
+  token: string,
 ): Promise<User> => {
   const response = await fetch(`${API_URL}/v1/user`, {
     method: "POST",
@@ -126,7 +142,7 @@ export const syncUserFn = async (
 // --- UPDATE USER ---
 export const updateUserFn = async (
   userData: Partial<User>,
-  token: string
+  token: string,
 ): Promise<User> => {
   const response = await fetch(`${API_URL}/v1/user`, {
     method: "PATCH",
@@ -160,7 +176,7 @@ export interface CreateApplicationInput {
 
 export const createApplicationFn = async (
   data: CreateApplicationInput,
-  token: string
+  token: string,
 ) => {
   const response = await fetch(`${API_URL}/v1/creator-onboarding`, {
     method: "POST",
@@ -171,7 +187,7 @@ export const createApplicationFn = async (
     body: JSON.stringify(data),
   });
 
-  const json: BackendResponse<any> = await response.json();
+  const json: BackendResponse<unknown> = await response.json();
 
   if (!response.ok || !json.ok) {
     throw new Error(json.message || "Application submission failed");

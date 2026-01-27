@@ -20,7 +20,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Controller } from "react-hook-form";
-import { CustomFormField } from "@/components/ui/custom-form-field";
 import StepReview from "@/components/onboarding/steps/review";
 
 // Configuration for steps
@@ -57,6 +56,7 @@ const STEPS = [
 
 import { usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
+import NextImage from "next/image";
 import { createApplicationFn } from "@/services/auth/model/api/mutations";
 
 export default function OnboardingPage() {
@@ -95,7 +95,8 @@ export default function OnboardingPage() {
     let valid = true;
     if (stepConfig.schema) {
       const keys = stepConfig.schema.keyof().options; // Get keys from Zod schema
-      valid = await trigger(keys as any);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      valid = await trigger(keys as unknown as any);
     }
 
     if (valid) setCurrentStep((prev) => Math.min(prev + 1, STEPS.length));
@@ -121,14 +122,17 @@ export default function OnboardingPage() {
           emailAddress: data.email,
           socials: data.socials,
         },
-        token
+        token,
       );
 
       toast.success("Application Submitted successfully!");
       router.push("/dashboard"); // Redirect after success
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error(error);
-      toast.error(error.message || "Failed to submit application");
+      const message =
+        error instanceof Error ? error.message : "Failed to submit application";
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -138,10 +142,11 @@ export default function OnboardingPage() {
     // Wrap everything in FormProvider so children can use useFormContext
     <FormProvider {...methods}>
       <div className="flex h-screen w-full font-sans text-slate-900 p-10 bg-[#f9efe3] overflow-hidden">
-        <img
-          className="masked-img absolute top-0 left-0"
+        <NextImage
+          className="masked-img absolute top-0 left-0 object-cover"
           src="/images/hero/hero-image.jpg"
           alt="Hero Background"
+          fill
         />
         <OnboardingSidebar steps={STEPS} currentStep={currentStep} />
 

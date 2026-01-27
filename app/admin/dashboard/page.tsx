@@ -11,7 +11,7 @@ import {
 } from "@/services/admin/api";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Loader2, CheckCircle, XCircle, ExternalLink } from "lucide-react";
+import { Loader2, CheckCircle, ExternalLink, XCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -40,7 +40,7 @@ const AdminDashboard = () => {
 
   // State for Actions
   const [selectedApp, setSelectedApp] = useState<CreatorApplication | null>(
-    null
+    null,
   );
   const [approvalSector, setApprovalSector] = useState<string>("");
   const [rejectionReason, setRejectionReason] = useState<string>("");
@@ -81,7 +81,7 @@ const AdminDashboard = () => {
     },
     onSuccess: (_, variables) => {
       toast.success(
-        `Application ${variables.state.toLowerCase()} successfully`
+        `Application ${variables.state.toLowerCase()} successfully`,
       );
       queryClient.invalidateQueries({ queryKey: ["admin", "applications"] });
       // Reset States
@@ -91,7 +91,7 @@ const AdminDashboard = () => {
       setApprovalSector("");
       setRejectionReason("");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Failed to update application");
     },
   });
@@ -199,7 +199,10 @@ const AdminDashboard = () => {
 
         <div className="space-y-2">
           <Label>Sort Order</Label>
-          <Select value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
+          <Select
+            value={sortBy}
+            onValueChange={(v: string) => setSortBy(v as "asc" | "desc")}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>

@@ -14,9 +14,9 @@ import {
   Menu,
   HelpCircle,
   LogOut,
-  X,
   Rocket,
 } from "lucide-react";
+import Image from "next/image";
 import { useAuth } from "@/services/auth/model/hooks/useAuth";
 import { useUser } from "@/services/auth/model/hooks/useUser";
 import { toast } from "sonner";
@@ -79,24 +79,28 @@ export default function ProtectedLayout({
       <div
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-80 bg-[#f9efe3] pl-5 py-5 transform transition-transform duration-200 ease-in-out lg:translate-x-0",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          sidebarOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         <div className="flex h-full flex-col bg-white rounded-xl">
           {/* Logo */}
           <div className="flex items-center gap-3 py-10 px-7">
-            <img
+            <Image
               src="/images/logo/logo-icon.jpeg"
               alt="Logo"
+              width={48}
+              height={48}
               className="h-12 w-12 rounded-lg"
               onError={(e) =>
                 (e.currentTarget.src = "https://placehold.co/32x32?text=L")
               }
             />
-            <img
+            <Image
               src="/images/logo/logo-name-dark.png"
               alt="Brand"
-              className="h-8"
+              width={120}
+              height={32}
+              className="h-8 w-auto"
               onError={(e) => (e.currentTarget.style.display = "none")}
             />
           </div>
@@ -125,7 +129,7 @@ export default function ProtectedLayout({
                       "h-6 w-6 shrink-0",
                       isActive
                         ? "text-[#F2723B]"
-                        : "text-zinc-400 group-hover:text-zinc-600"
+                        : "text-zinc-400 group-hover:text-zinc-600",
                     )}
                   />
                   <div
@@ -156,7 +160,7 @@ export default function ProtectedLayout({
                     "h-6 w-6 shrink-0",
                     pathname === "/token/launch"
                       ? "text-[#F2723B]"
-                      : "text-zinc-400 group-hover:text-zinc-600"
+                      : "text-zinc-400 group-hover:text-zinc-600",
                   )}
                 />
                 <div
@@ -195,7 +199,7 @@ export default function ProtectedLayout({
                       "h-6 w-6 shrink-0",
                       isActive
                         ? "text-[#F2723B]"
-                        : "text-zinc-400 group-hover:text-zinc-600"
+                        : "text-zinc-400 group-hover:text-zinc-600",
                     )}
                   />
                   <div
@@ -246,9 +250,11 @@ export default function ProtectedLayout({
             <Menu className="h-5 w-5" />
           </button>
           <div className="flex items-center gap-3">
-            <img
+            <Image
               src="/images/logo/logo-icon.jpeg"
               alt="Logo"
+              width={24}
+              height={24}
               className="h-6 w-6 rounded"
               onError={(e) =>
                 (e.currentTarget.src = "https://placehold.co/24x24?text=L")

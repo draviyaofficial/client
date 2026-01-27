@@ -49,7 +49,7 @@ const ContactPage: React.FC = () => {
   });
 
   const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -59,10 +59,10 @@ const ContactPage: React.FC = () => {
     e.preventDefault();
     const recipient = "draviyaofficial@gmail.com";
     const subject = encodeURIComponent(
-      `${formData.intent} from ${formData.name}`
+      `${formData.intent} from ${formData.name}`,
     );
     const body = encodeURIComponent(
-      `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
+      `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`,
     );
     window.location.href = `mailto:${recipient}?subject=${subject}&body=${body}`;
   };
@@ -82,7 +82,7 @@ const ContactPage: React.FC = () => {
               Direct Channels
             </span>
             <h1 className="text-6xl md:text-8xl font-medium tracking-tighter leading-[0.9] mb-8">
-              Let’s start a <br />
+              Let&#39;s start a <br />
               <span className="italic font-serif text-zinc-400">
                 new conversation.
               </span>
@@ -100,7 +100,7 @@ const ContactPage: React.FC = () => {
           >
             <div>
               <h2 className="text-sm font-mono uppercase tracking-[0.2em] text-zinc-400 mb-8 flex items-center gap-4">
-                <span className="w-8 h-[1px] bg-zinc-300"></span> The Founders
+                <span className="w-8 h-px bg-zinc-300"></span> The Founders
               </h2>
               <div className="grid grid-cols-1 gap-8">
                 {founders.map((founder) => (
@@ -245,7 +245,8 @@ const ContactPage: React.FC = () => {
         {/* Footer Statement */}
         <section className="max-w-7xl mx-auto px-6 border-t border-zinc-200 pt-20 text-center">
           <div className="font-serif italic text-3xl text-zinc-400 mb-4 max-w-2xl mx-auto leading-tight">
-            "The best conversations happen where infrastructure meets ambition."
+            &quot;The best conversations happen where infrastructure meets
+            ambition.&quot;
           </div>
           <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-zinc-300">
             — DRAVIYA

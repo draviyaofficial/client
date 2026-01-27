@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Coins, Rocket, LogOut, Settings } from "lucide-react";
+import { LayoutDashboard, Coins, Rocket, LogOut } from "lucide-react";
 import { useAuth } from "@/services/auth/model/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";

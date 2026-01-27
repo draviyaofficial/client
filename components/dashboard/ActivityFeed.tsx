@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowUpRight, ArrowDownRight, Plus, Minus, Clock } from "lucide-react";
+import { ArrowUpRight, Plus, Minus, Clock } from "lucide-react";
 
 const mockActivities = [
   {

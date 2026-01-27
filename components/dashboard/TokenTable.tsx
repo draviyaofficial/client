@@ -1,10 +1,6 @@
 import React from "react";
-import {
-  ArrowUpRight,
-  ArrowDownRight,
-  TrendingUp,
-  TrendingDown,
-} from "lucide-react";
+import { TrendingUp, TrendingDown } from "lucide-react";
+import NextImage from "next/image";
 
 interface Token {
   id: string;
@@ -57,11 +53,12 @@ export function TokenTable({ tokens }: TokenTableProps) {
               <tr key={token.id} className="hover:bg-zinc-50 transition-colors">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <img
+                    <NextImage
                       src={token.avatar}
                       alt={token.creator}
+                      width={32}
+                      height={32}
                       className="h-8 w-8 rounded-full"
-                      loading="lazy"
                     />
                     <span className="font-medium text-zinc-900">
                       {token.creator}

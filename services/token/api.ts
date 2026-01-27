@@ -1,6 +1,4 @@
-import { CreatorApplication } from "../admin/api";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+import { API_URL } from "../apiConfig";
 
 const defaultHeaders = {
   "Content-Type": "application/json",
@@ -25,6 +23,7 @@ export interface TokenApplication {
   telegramUrl?: string;
   discordUrl?: string;
   status: "DRAFT" | "SUBMITTED" | "APPROVED" | "MINTED" | "REJECTED";
+  mintAddress?: string;
   rejectionReason?: string;
   createdAt: string;
   user?: {
@@ -54,6 +53,11 @@ interface FetchTokenApplicationsParams {
   search?: string;
 }
 
+/**
+ * Checks if a token ticker symbol is available.
+ * @param symbol - The ticker symbol to check.
+ * @returns Object indicating availability and the symbol.
+ */
 export const checkTickerAvailabilityFn = async (symbol: string) => {
   const response = await fetch(`${API_URL}/v1/token/ticker/${symbol}`, {
     method: "GET",
@@ -72,6 +76,12 @@ export const checkTickerAvailabilityFn = async (symbol: string) => {
   return json.data;
 };
 
+/**
+ * Submits a new token application.
+ * @param token - The user's session token.
+ * @param data - The token application data.
+ * @returns The created token application.
+ */
 export const applyTokenFn = async (token: string, data: ApplyTokenData) => {
   const response = await fetch(`${API_URL}/v1/token/apply`, {
     method: "POST",
@@ -93,8 +103,11 @@ export const applyTokenFn = async (token: string, data: ApplyTokenData) => {
 
 export const fetchTokenApplicationsFn = async (
   token: string,
-  params: FetchTokenApplicationsParams = {}
-): Promise<{ data: TokenApplication[]; meta: any }> => {
+  params: FetchTokenApplicationsParams = {},
+): Promise<{
+  data: TokenApplication[];
+  meta: { total: number; page: number; limit: number; totalPages: number };
+}> => {
   const query = new URLSearchParams({
     page: (params.page || 1).toString(),
     limit: (params.limit || 20).toString(),
@@ -112,7 +125,10 @@ export const fetchTokenApplicationsFn = async (
     },
   });
 
-  const json: BackendResponse<any> = await response.json();
+  const json: BackendResponse<{
+    data: TokenApplication[];
+    meta: { total: number; page: number; limit: number; totalPages: number };
+  }> = await response.json();
 
   if (!response.ok || !json.ok) {
     throw new Error(json.message || "Failed to fetch token applications");
@@ -125,7 +141,7 @@ export const approveTokenApplicationFn = async (
   token: string,
   id: string,
   status: "APPROVED" | "REJECTED",
-  rejectionReason?: string
+  rejectionReason?: string,
 ) => {
   const response = await fetch(`${API_URL}/v1/token/${id}/approve`, {
     method: "PUT", // Matches server route
@@ -148,7 +164,7 @@ export const approveTokenApplicationFn = async (
 export const rejectTokenApplicationFn = async (
   token: string,
   id: string,
-  rejectionReason: string
+  rejectionReason: string,
 ) => {
   const response = await fetch(`${API_URL}/v1/token/${id}/reject`, {
     method: "PUT", // Matches server route

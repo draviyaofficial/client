@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Check, LucideIcon } from "lucide-react";
+import NextImage from "next/image";
 
 interface StepConfig {
   id: number;
@@ -16,31 +17,34 @@ interface SidebarProps {
 export const OnboardingSidebar = ({ steps, currentStep }: SidebarProps) => {
   return (
     <aside className="hidden lg:flex w-2/5 max-w-xl flex-col justify-between border-r border-slate-100 relative overflow-hidden rounded-4xl">
-      <img
+      <NextImage
         src="/images/howitworks/bg.png"
         alt="Onboarding Background"
-        className="w-full h-full object-cover absolute top-0"
-        loading="lazy"
+        fill
+        className="object-cover absolute top-0"
+        priority
       />
 
       <div className="relative z-10 p-12">
         <div className="mb-12">
           <div className="flex gap-3 items-center mb-10">
-            <img
+            <NextImage
               src="/images/logo/logo-icon.jpeg"
               alt="Draviya Logo"
+              width={48}
+              height={48}
               className="h-10 w-10 md:h-12 md:w-12 rounded-xl"
               onError={(e) =>
                 (e.currentTarget.src = "https://placehold.co/48x48?text=L")
               }
-              loading="lazy"
             />
-            <img
+            <NextImage
               src="/images/logo/logo-name-light.png"
               alt="Draviya Brand"
-              className="h-6 md:h-8"
+              width={100}
+              height={32}
+              className="h-6 md:h-8 w-auto"
               onError={(e) => (e.currentTarget.style.display = "none")}
-              loading="lazy"
             />
           </div>
           <h1 className="text-4xl font-semibold text-white">
@@ -64,7 +68,7 @@ export const OnboardingSidebar = ({ steps, currentStep }: SidebarProps) => {
                   <div
                     className={cn(
                       "absolute left-[19px] top-10 w-[2px] h-[calc(100%-16px)]",
-                      isCompleted ? "bg-[#faa580]" : "bg-zinc-200"
+                      isCompleted ? "bg-[#faa580]" : "bg-zinc-200",
                     )}
                   />
                 )}
@@ -76,8 +80,8 @@ export const OnboardingSidebar = ({ steps, currentStep }: SidebarProps) => {
                     isActive
                       ? "border-[#faa580] bg-white text-[#F3733C] shadow-md scale-110"
                       : isCompleted
-                      ? "border-[#faa580] bg-[#F3733C] text-white"
-                      : "border-zinc-200 bg-zinc-50 text-zinc-300"
+                        ? "border-[#faa580] bg-[#F3733C] text-white"
+                        : "border-zinc-200 bg-zinc-50 text-zinc-300",
                   )}
                 >
                   {isCompleted ? <Check size={18} /> : <step.icon size={18} />}
@@ -87,13 +91,13 @@ export const OnboardingSidebar = ({ steps, currentStep }: SidebarProps) => {
                 <div
                   className={cn(
                     "transition-opacity",
-                    isActive ? "opacity-100" : "opacity-60"
+                    isActive ? "opacity-100" : "opacity-60",
                   )}
                 >
                   <h3
                     className={cn(
                       "font-bold text-md",
-                      isActive ? "text-[#f98d5f]" : "text-zinc-400"
+                      isActive ? "text-[#f98d5f]" : "text-zinc-400",
                     )}
                   >
                     {step.title}

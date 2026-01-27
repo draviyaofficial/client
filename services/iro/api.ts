@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+import { API_URL } from "../apiConfig";
 
 const defaultHeaders = {
   "Content-Type": "application/json",
@@ -41,9 +41,17 @@ interface BackendResponse<T> {
   data: T;
 }
 
+/**
+ * Lists Initial Royalty Offerings.
+ * @param params - Query parameters.
+ * @returns List of IROs.
+ */
 export const listIROsFn = async (
-  params: FetchIROsParams = {}
-): Promise<{ data: IRO[]; meta: any }> => {
+  params: FetchIROsParams = {},
+): Promise<{
+  data: IRO[];
+  meta: { total: number; page: number; limit: number; totalPages: number };
+}> => {
   const query = new URLSearchParams({
     page: (params.page || 1).toString(),
     limit: (params.limit || 20).toString(),
@@ -57,7 +65,10 @@ export const listIROsFn = async (
     },
   });
 
-  const json: BackendResponse<any> = await response.json();
+  const json: BackendResponse<{
+    data: IRO[];
+    meta: { total: number; page: number; limit: number; totalPages: number };
+  }> = await response.json();
 
   if (!response.ok || !json.ok) {
     throw new Error(json.message || "Failed to fetch IROs");

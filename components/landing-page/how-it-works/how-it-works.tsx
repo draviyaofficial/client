@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
+import NextImage from "next/image";
 
 const STEPS = [
   {
@@ -33,7 +34,7 @@ const HowItWorks = () => {
   useEffect(() => {
     const i = setInterval(
       () => setCurrentStep((prev) => (prev + 1) % STEPS.length),
-      7000
+      7000,
     );
     return () => clearInterval(i);
   }, []);
@@ -48,8 +49,9 @@ const HowItWorks = () => {
         </h3>
 
         <p className="text-zinc-500 text-base sm:text-lg font-semibold leading-relaxed">
-          Yes, it's fully on-chain, yes, liquidity is instant, and no, you don't
-          have to understand bonding curves to use it like an absolute pro.
+          Yes, it&apos;s fully on-chain, yes, liquidity is instant, and no, you
+          don&apos;t have to understand bonding curves to use it like an
+          absolute pro.
         </p>
 
         <div className="flex flex-col gap-3 sm:gap-4 lg:gap-5 pr-0 lg:pr-10 relative">
@@ -81,11 +83,12 @@ const HowItWorks = () => {
                   />
                 )}
 
-                <img
+                <NextImage
                   src={step.icon}
                   className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 shrink-0"
                   alt={step.title}
-                  loading="lazy"
+                  width={28}
+                  height={28}
                 />
                 <span className="text-zinc-900 font-semibold text-sm sm:text-base lg:text-lg">
                   {step.title}
@@ -100,11 +103,11 @@ const HowItWorks = () => {
       <div className="w-full lg:w-[53%] rounded-2xl sm:rounded-3xl lg:rounded-4xl relative overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0 rounded-2xl sm:rounded-3xl lg:rounded-4xl overflow-hidden">
-          <img
+          <NextImage
             src="/images/howitworks/bg.png"
-            className="w-full h-full object-cover"
+            className="object-cover"
             alt="How It Works Background"
-            loading="lazy"
+            fill
           />
           {/* Dark overlay for better text contrast */}
           <div className="absolute inset-0 bg-black/30" />

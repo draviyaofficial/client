@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { TrendingUp, TrendingDown, DollarSign, PieChart, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { ChartContainer } from "@/components/dashboard/ChartContainer";
+import NextImage from "next/image";
 
 // Mock portfolio data
 const mockHoldings = [
@@ -60,21 +61,21 @@ const mockHoldings = [
   },
 ];
 
-const mockPortfolioHistory = [
-  { date: "Jan", value: 9500 },
-  { date: "Feb", value: 10200 },
-  { date: "Mar", value: 9800 },
-  { date: "Apr", value: 11500 },
-  { date: "May", value: 12100 },
-  { date: "Jun", value: 12450 },
-];
-
 export default function PortfolioPage() {
   const [timeRange, setTimeRange] = useState("1M");
 
-  const totalValue = mockHoldings.reduce((sum, holding) => sum + parseFloat(holding.value.replace('$', '')), 0);
-  const totalPnL = mockHoldings.reduce((sum, holding) => sum + parseFloat(holding.pnl.replace(/[+$]/g, '').replace('-', '-')), 0);
-  const totalPnLPercent = ((totalPnL / (totalValue - totalPnL)) * 100).toFixed(1);
+  const totalValue = mockHoldings.reduce(
+    (sum, holding) => sum + parseFloat(holding.value.replace("$", "")),
+    0,
+  );
+  const totalPnL = mockHoldings.reduce(
+    (sum, holding) =>
+      sum + parseFloat(holding.pnl.replace(/[+$]/g, "").replace("-", "-")),
+    0,
+  );
+  const totalPnLPercent = ((totalPnL / (totalValue - totalPnL)) * 100).toFixed(
+    1,
+  );
 
   return (
     <div className="space-y-8">
@@ -95,7 +96,7 @@ export default function PortfolioPage() {
         <ChartContainer
           title="Total Portfolio Value"
           value={`$${totalValue.toFixed(2)}`}
-          change={`${totalPnL >= 0 ? '+' : ''}$${totalPnL.toFixed(2)} (${totalPnLPercent}%)`}
+          change={`${totalPnL >= 0 ? "+" : ""}$${totalPnL.toFixed(2)} (${totalPnLPercent}%)`}
           changeType={totalPnL >= 0 ? "positive" : "negative"}
         >
           {/* Placeholder chart */}
@@ -119,7 +120,9 @@ export default function PortfolioPage() {
       {/* Portfolio Chart */}
       <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-zinc-900">Portfolio Performance</h2>
+          <h2 className="text-xl font-semibold text-zinc-900">
+            Portfolio Performance
+          </h2>
           <div className="flex gap-2">
             {["1W", "1M", "3M", "6M", "1Y", "ALL"].map((range) => (
               <button
@@ -142,7 +145,9 @@ export default function PortfolioPage() {
           <div className="text-center text-zinc-400">
             <TrendingUp className="h-12 w-12 mx-auto mb-4" />
             <p className="text-lg font-medium">Portfolio Chart</p>
-            <p className="text-sm">Interactive chart showing portfolio performance over time</p>
+            <p className="text-sm">
+              Interactive chart showing portfolio performance over time
+            </p>
           </div>
         </div>
       </div>
@@ -182,31 +187,46 @@ export default function PortfolioPage() {
             </thead>
             <tbody className="divide-y divide-zinc-100">
               {mockHoldings.map((holding) => (
-                <tr key={holding.id} className="hover:bg-zinc-50 transition-colors">
+                <tr
+                  key={holding.id}
+                  className="hover:bg-zinc-50 transition-colors"
+                >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <img
+                      <NextImage
                         src={holding.avatar}
                         alt={holding.creator}
+                        width={32}
+                        height={32}
                         className="h-8 w-8 rounded-full"
                       />
                       <div>
-                        <span className="font-medium text-zinc-900">{holding.creator}</span>
-                        <p className="text-xs text-zinc-500">{holding.category}</p>
+                        <span className="font-medium text-zinc-900">
+                          {holding.creator}
+                        </span>
+                        <p className="text-xs text-zinc-500">
+                          {holding.category}
+                        </p>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <span className="font-medium text-zinc-900">{holding.tokens}</span>
+                    <span className="font-medium text-zinc-900">
+                      {holding.tokens}
+                    </span>
                   </td>
                   <td className="px-6 py-4 text-right">
                     <span className="text-zinc-600">{holding.avgPrice}</span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <span className="font-medium text-zinc-900">{holding.currentPrice}</span>
+                    <span className="font-medium text-zinc-900">
+                      {holding.currentPrice}
+                    </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <span className="font-medium text-zinc-900">{holding.value}</span>
+                    <span className="font-medium text-zinc-900">
+                      {holding.value}
+                    </span>
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-1">
@@ -215,7 +235,9 @@ export default function PortfolioPage() {
                       ) : (
                         <ArrowDownRight className="h-4 w-4 text-red-600" />
                       )}
-                      <span className={`font-medium ${holding.pnlType === "positive" ? "text-green-600" : "text-red-600"}`}>
+                      <span
+                        className={`font-medium ${holding.pnlType === "positive" ? "text-green-600" : "text-red-600"}`}
+                      >
                         {holding.pnlPercent}
                       </span>
                     </div>
@@ -235,19 +257,31 @@ export default function PortfolioPage() {
       {/* Asset Allocation */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-zinc-900 mb-4">Asset Allocation</h3>
+          <h3 className="text-lg font-semibold text-zinc-900 mb-4">
+            Asset Allocation
+          </h3>
           <div className="space-y-3">
             {mockHoldings.map((holding) => {
-              const percentage = ((parseFloat(holding.value.replace('$', '')) / totalValue) * 100).toFixed(1);
+              const percentage = (
+                (parseFloat(holding.value.replace("$", "")) / totalValue) *
+                100
+              ).toFixed(1);
               return (
-                <div key={holding.id} className="flex items-center justify-between">
+                <div
+                  key={holding.id}
+                  className="flex items-center justify-between"
+                >
                   <div className="flex items-center gap-3">
-                    <img
+                    <NextImage
                       src={holding.avatar}
                       alt={holding.creator}
+                      width={24}
+                      height={24}
                       className="h-6 w-6 rounded-full"
                     />
-                    <span className="text-sm font-medium text-zinc-900">{holding.creator}</span>
+                    <span className="text-sm font-medium text-zinc-900">
+                      {holding.creator}
+                    </span>
                   </div>
                   <span className="text-sm text-zinc-600">{percentage}%</span>
                 </div>
@@ -257,25 +291,37 @@ export default function PortfolioPage() {
         </div>
 
         <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-zinc-900 mb-4">Performance Summary</h3>
+          <h3 className="text-lg font-semibold text-zinc-900 mb-4">
+            Performance Summary
+          </h3>
           <div className="space-y-4">
             <div className="flex justify-between">
               <span className="text-sm text-zinc-600">Total Invested</span>
-              <span className="text-sm font-medium text-zinc-900">$1,089.50</span>
+              <span className="text-sm font-medium text-zinc-900">
+                $1,089.50
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-zinc-600">Current Value</span>
-              <span className="text-sm font-medium text-zinc-900">${totalValue.toFixed(2)}</span>
+              <span className="text-sm font-medium text-zinc-900">
+                ${totalValue.toFixed(2)}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-zinc-600">Total P&L</span>
-              <span className={`text-sm font-medium ${totalPnL >= 0 ? "text-green-600" : "text-red-600"}`}>
+              <span
+                className={`text-sm font-medium ${totalPnL >= 0 ? "text-green-600" : "text-red-600"}`}
+              >
                 {totalPnL >= 0 ? "+" : ""}${totalPnL.toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between border-t border-zinc-100 pt-3">
-              <span className="text-sm font-medium text-zinc-900">Total Return</span>
-              <span className={`text-sm font-medium ${totalPnL >= 0 ? "text-green-600" : "text-red-600"}`}>
+              <span className="text-sm font-medium text-zinc-900">
+                Total Return
+              </span>
+              <span
+                className={`text-sm font-medium ${totalPnL >= 0 ? "text-green-600" : "text-red-600"}`}
+              >
                 {totalPnLPercent}%
               </span>
             </div>
@@ -285,5 +331,3 @@ export default function PortfolioPage() {
     </div>
   );
 }
-
-

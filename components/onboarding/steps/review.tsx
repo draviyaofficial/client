@@ -19,11 +19,11 @@ const ReviewRow = ({
   <div
     className={cn(
       "flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-zinc-100 last:border-0 gap-1",
-      className
+      className,
     )}
   >
     <span className="text-zinc-500 text-sm">{label}</span>
-    <span className="text-zinc-900 font-medium text-sm text-right break-words max-w-full sm:max-w-[60%]">
+    <span className="text-zinc-900 font-medium text-sm text-right wrap-break-word max-w-full sm:max-w-[60%]">
       {value || <span className="text-zinc-300 italic">Not provided</span>}
     </span>
   </div>
@@ -36,7 +36,7 @@ const ReviewSection = ({
   children,
 }: {
   title: string;
-  icon: any;
+  icon: React.ElementType;
   children: React.ReactNode;
 }) => (
   <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-zinc-200 shadow-sm">

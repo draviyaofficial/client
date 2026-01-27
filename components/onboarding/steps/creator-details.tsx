@@ -2,14 +2,6 @@ import { useFormContext } from "react-hook-form";
 import { OnboardingFormData } from "@/lib/schemas/onboarding-schema";
 import { CustomFormField } from "@/components/ui/custom-form-field";
 
-const CATEGORIES = [
-  { label: "Artist", value: "artist" },
-  { label: "Musician", value: "musician" },
-  { label: "Developer", value: "developer" },
-  { label: "Entrepreneur", value: "entrepreneur" },
-  // ...others
-];
-
 export const StepCreatorDetails = () => {
   const { control } = useFormContext<OnboardingFormData>();
 

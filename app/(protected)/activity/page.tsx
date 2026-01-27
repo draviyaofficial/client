@@ -2,8 +2,6 @@
 
 import React, { useState } from "react";
 import {
-  ArrowUpRight,
-  ArrowDownRight,
   Plus,
   Minus,
   Building,
@@ -159,9 +157,11 @@ export default function ActivityPage() {
   const [typeFilter, setTypeFilter] = useState("all");
 
   const filteredActivities = mockActivities.filter((activity) => {
-    const matchesSearch = activity.creator.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         activity.amount.includes(searchQuery);
-    const matchesStatus = statusFilter === "all" || activity.status === statusFilter;
+    const matchesSearch =
+      activity.creator.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      activity.amount.includes(searchQuery);
+    const matchesStatus =
+      statusFilter === "all" || activity.status === statusFilter;
     const matchesType = typeFilter === "all" || activity.type === typeFilter;
     return matchesSearch && matchesStatus && matchesType;
   });
@@ -169,7 +169,9 @@ export default function ActivityPage() {
   const formatTime = (timeString: string) => {
     const date = new Date(timeString);
     const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    const diffInHours = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60),
+    );
 
     if (diffInHours < 1) return "Just now";
     if (diffInHours < 24) return `${diffInHours}h ago`;
@@ -243,7 +245,9 @@ export default function ActivityPage() {
       {/* Activity Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-medium text-zinc-500">Total Transactions</p>
+          <p className="text-sm font-medium text-zinc-500">
+            Total Transactions
+          </p>
           <p className="text-2xl font-bold text-zinc-900 mt-1">156</p>
           <p className="text-sm text-green-600 mt-2">+12 this week</p>
         </div>
@@ -267,7 +271,9 @@ export default function ActivityPage() {
       {/* Activity Table */}
       <div className="rounded-xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
         <div className="border-b border-zinc-200 bg-zinc-50/50 px-6 py-4">
-          <h2 className="text-xl font-semibold text-zinc-900">Transaction History</h2>
+          <h2 className="text-xl font-semibold text-zinc-900">
+            Transaction History
+          </h2>
         </div>
 
         <div className="overflow-x-auto">
@@ -299,32 +305,49 @@ export default function ActivityPage() {
             </thead>
             <tbody className="divide-y divide-zinc-100">
               {filteredActivities.map((activity) => (
-                <tr key={activity.id} className="hover:bg-zinc-50 transition-colors">
+                <tr
+                  key={activity.id}
+                  className="hover:bg-zinc-50 transition-colors"
+                >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className={`h-8 w-8 rounded-lg ${activity.bgColor} flex items-center justify-center`}>
-                        <activity.icon className={`h-4 w-4 ${activity.iconColor}`} />
+                      <div
+                        className={`h-8 w-8 rounded-lg ${activity.bgColor} flex items-center justify-center`}
+                      >
+                        <activity.icon
+                          className={`h-4 w-4 ${activity.iconColor}`}
+                        />
                       </div>
-                      <span className="font-medium text-zinc-900 capitalize">{activity.type}</span>
+                      <span className="font-medium text-zinc-900 capitalize">
+                        {activity.type}
+                      </span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="font-medium text-zinc-900">{activity.creator}</span>
+                    <span className="font-medium text-zinc-900">
+                      {activity.creator}
+                    </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <span className="font-medium text-zinc-900">{activity.amount}</span>
+                    <span className="font-medium text-zinc-900">
+                      {activity.amount}
+                    </span>
                   </td>
                   <td className="px-6 py-4 text-right">
                     <span className="text-zinc-600">{activity.tokens}</span>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(activity.status)}`}>
+                    <div
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(activity.status)}`}
+                    >
                       {getStatusIcon(activity.status)}
                       <span className="capitalize">{activity.status}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-sm text-zinc-600">{formatTime(activity.time)}</span>
+                    <span className="text-sm text-zinc-600">
+                      {formatTime(activity.time)}
+                    </span>
                   </td>
                   <td className="px-6 py-4 text-right">
                     {activity.txHash && (
@@ -342,12 +365,12 @@ export default function ActivityPage() {
         {filteredActivities.length === 0 && (
           <div className="text-center py-12">
             <Clock className="h-12 w-12 text-zinc-300 mx-auto mb-4" />
-            <p className="text-zinc-500">No transactions found matching your filters.</p>
+            <p className="text-zinc-500">
+              No transactions found matching your filters.
+            </p>
           </div>
         )}
       </div>
     </div>
   );
 }
-
-

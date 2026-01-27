@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Link from "next/link";
 import Navbar from "@/components/landing-page/navbar/navbar";
 import Footer from "@/components/landing-page/footer/footer";
 import { motion } from "motion/react";
@@ -67,12 +68,13 @@ export default function AboutPage() {
                 <p>
                   During the lockdown, creators weren’t just entertainment; they
                   became our educators and companions. But as life got busy
-                  again, supporting them started to feel like a "guilty
-                  pleasure."
+                  again, supporting them started to feel like a &quot;guilty
+                  pleasure.&quot;
                 </p>
                 <p className="italic font-serif text-xl text-zinc-900 border-l-2 border-[#FF2F00] pl-6 py-2 my-8">
-                  "Why does supporting a creator’s growth feel like wasted time,
-                  when we believe in their future as much as any startup?"
+                  &quot;Why does supporting a creator&#39;s growth feel like
+                  wasted time, when we believe in their future as much as any
+                  startup?&quot;
                 </p>
                 <p>
                   Fans invest massive emotional capital with no financial
@@ -111,7 +113,7 @@ export default function AboutPage() {
             className="lg:pt-10"
           >
             <h2 className="text-sm font-mono uppercase tracking-[0.2em] text-zinc-400 mb-12 flex items-center gap-4">
-              <span className="w-8 h-[1px] bg-zinc-300"></span> Our Mission
+              <span className="w-8 h-px bg-zinc-300"></span> Our Mission
             </h2>
 
             <div className="space-y-16">
@@ -163,12 +165,12 @@ export default function AboutPage() {
             Join the waitlist to be among the first to explore the new asset
             layer for the creator economy.
           </p>
-          <a
+          <Link
             href="/#waitlist-email-input"
             className="text-sm sm:text-base lg:text-lg xl:text-xl border border-zinc-900 bg-linear-to-t from-[#FF2F00] to-[#f5775b] cursor-pointer hover:from-[#FF2F00] hover:to-[#FF2F00] font-semibold text-white px-4 sm:px-5 lg:px-6 xl:px-7 py-2 sm:py-2.5 lg:py-3 rounded-full transition-all duration-300 relative z-50 inline-block"
           >
             Join Waitlist
-          </a>
+          </Link>
         </section>
       </main>
       <Footer />

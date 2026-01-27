@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,7 +12,7 @@ import { getEligibleCreatorsFn, createIROFn } from "@/services/admin/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -80,12 +80,13 @@ export default function CreateIROPage() {
       toast.success("IRO Created Successfully!");
       router.push("/admin/tokens"); // Redirect to token list or IRO list
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Failed to create IRO");
     },
   });
 
   const form = useForm<CreateIROFormValues>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(createIROSchema) as any,
     defaultValues: {
       tokenId: "",
@@ -106,9 +107,10 @@ export default function CreateIROPage() {
     formState: { errors },
   } = form;
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const selectedTokenId = watch("tokenId");
   const selectedCreator = eligibleCreators?.find(
-    (c) => c.createdToken?.id === selectedTokenId
+    (c) => c.createdToken?.id === selectedTokenId,
   );
 
   const onSubmit = (data: CreateIROFormValues) => {

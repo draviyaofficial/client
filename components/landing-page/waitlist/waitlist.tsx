@@ -38,7 +38,7 @@ export default function Waitlist() {
   return (
     <section
       id="waitlist"
-      className="w-full py-20 px-5 md:px-20 bg-gradient-to-b from-[#F9EFE3] to-white"
+      className="w-full py-20 px-5 md:px-20 bg-linear-to-b from-[#F9EFE3] to-white"
     >
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
@@ -49,9 +49,9 @@ export default function Waitlist() {
             Be among the first to experience the future of creator assets
           </p>
           {!isLoadingCount && count !== null && (
-            <div className="inline-flex items-center justify-center gap-4 px-8 py-5 bg-gradient-to-br from-white to-zinc-50 rounded-2xl shadow-lg border-2 border-zinc-200/50 backdrop-blur-sm relative overflow-hidden group">
+            <div className="inline-flex items-center justify-center gap-4 px-8 py-5 bg-linear-to-br from-white to-zinc-50 rounded-2xl shadow-lg border-2 border-zinc-200/50 backdrop-blur-sm relative overflow-hidden group">
               {/* Animated background gradient */}
-              <div className="absolute inset-0 bg-gradient-to-r from-[#F2723B]/10 via-[#FF2F00]/5 to-[#F2723B]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-linear-to-r from-[#F2723B]/10 via-[#FF2F00]/5 to-[#F2723B]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
               {/* Decorative elements */}
               <div className="absolute top-0 left-0 w-20 h-20 bg-[#F2723B]/20 rounded-full blur-2xl -translate-x-1/2 -translate-y-1/2" />
@@ -60,18 +60,18 @@ export default function Waitlist() {
               {/* Content */}
               <div className="relative z-10 flex items-center gap-4">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl md:text-5xl lg:text-6xl font-extrabold bg-gradient-to-r from-[#FF2F00] to-[#F2723B] bg-clip-text text-transparent">
+                  <span className="text-4xl md:text-5xl lg:text-6xl font-extrabold bg-linear-to-r from-[#FF2F00] to-[#F2723B] bg-clip-text text-transparent">
                     {count.toLocaleString()}
                   </span>
                 </div>
-                <div className="h-12 w-px bg-gradient-to-b from-transparent via-zinc-300 to-transparent" />
+                <div className="h-12 w-px bg-linear-to-b from-transparent via-zinc-300 to-transparent" />
                 <span className="text-zinc-700 font-semibold text-lg md:text-xl">
                   {count === 1 ? "person" : "people"} already joined
                 </span>
               </div>
 
               {/* Shine effect */}
-              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-linear-to-r from-transparent via-white/20 to-transparent" />
             </div>
           )}
         </div>

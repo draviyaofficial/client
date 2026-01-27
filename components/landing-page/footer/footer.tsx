@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FaArrowTurnDown } from "react-icons/fa6";
+import NextImage from "next/image";
 import NewsletterSignup from "./newsletter-signup";
 
 const SOCIALS = [
@@ -7,16 +7,19 @@ const SOCIALS = [
     title: "Twitter",
     icon: "/images/socials/twitter.png",
     link: "https://x.com/Draviyaofficial",
+    rotation: -5,
   },
   {
     title: "Instagram",
     icon: "/images/socials/instagram.png",
     link: "https://www.instagram.com/draviyaofficial",
+    rotation: 7,
   },
   {
     title: "GitHub",
     icon: "/images/socials/github.png",
     link: "https://github.com/draviyaofficial",
+    rotation: -3,
   },
 ];
 
@@ -38,11 +41,12 @@ const FOOTER_ITEMS = [
 const Footer = () => {
   return (
     <section className="w-full h-screen p-2 sm:p-3 lg:p-4 relative overflow-x-hidden">
-      <img
+      <NextImage
         src="/images/footer/bg.png"
         alt="Footer Background"
-        className="w-full h-full object-cover object-center rounded-2xl sm:rounded-3xl lg:rounded-4xl"
-        loading="lazy"
+        fill
+        className="object-cover object-center rounded-2xl sm:rounded-3xl lg:rounded-4xl"
+        priority
       />
       <div className="absolute text-white inset-0 p-2 sm:p-3 lg:p-4 w-full h-full">
         <div className="h-[75%] sm:h-[78%] lg:h-[80%] xl:h-[82%] w-full pt-8 sm:pt-12 lg:pt-16 xl:pt-20 2xl:pt-24">
@@ -54,21 +58,20 @@ const Footer = () => {
             <div className="flex flex-col gap-2 sm:gap-3 items-center">
               <div className="flex gap-2 sm:gap-3 lg:gap-4">
                 {SOCIALS.map((social, index) => {
-                  const randomRotation = Math.random() * 20 - 10;
-
                   return (
                     <Link key={index} href={social.link}>
                       <div
                         className="p-2 sm:p-2.5 lg:p-3 border border-zinc-300 bg-white shadow-zinc-500 rounded-lg sm:rounded-xl hover:-translate-y-1 sm:hover:-translate-y-2 duration-300 transition-all"
                         style={{
-                          transform: `rotate(${randomRotation}deg)`,
+                          transform: `rotate(${social.rotation}deg)`,
                         }}
                       >
-                        <img
+                        <NextImage
                           src={social.icon}
                           alt={social.title}
+                          width={20}
+                          height={20}
                           className="h-4 w-4 sm:h-5 sm:w-5"
-                          loading="lazy"
                         />
                       </div>
                     </Link>

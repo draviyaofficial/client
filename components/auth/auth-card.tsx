@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import NextImage from "next/image";
 
 interface AuthCardProps {
   title: string;
@@ -132,12 +133,13 @@ const SocialButton = ({
     type="button"
     className="border-2 border-zinc-200 rounded-md px-5 py-3 font-bold text-zinc-900 flex gap-2 items-center hover:bg-zinc-50 transition-colors bg-white"
   >
-    <img
+    <NextImage
       src={`/images/auth/${provider}.png`}
       alt={`${label} logo`}
+      width={24}
+      height={24}
       className="h-6 w-6"
       onError={(e) => (e.currentTarget.style.display = "none")}
-      loading="lazy"
     />
     {label}
   </button>

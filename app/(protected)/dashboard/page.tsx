@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { useUser } from "@/services/auth/model/hooks/useUser";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { CreatorCard } from "@/components/dashboard/CreatorCard";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
@@ -109,8 +108,6 @@ const mockTrendingCreators = [
 ];
 
 export default function DashboardPage() {
-  const { data: user } = useUser();
-
   return (
     <div className="space-y-8 bg-white rounded-xl p-10">
       {/* Header */}

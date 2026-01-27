@@ -11,13 +11,7 @@ import {
 } from "@/services/token/api";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import {
-  Loader2,
-  CheckCircle,
-  XCircle,
-  ExternalLink,
-  ArrowLeft,
-} from "lucide-react";
+import { Loader2, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -35,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import NextImage from "next/image";
 import { Input } from "@/components/ui/input";
 
 const AdminTokensPage = () => {
@@ -91,7 +86,7 @@ const AdminTokensPage = () => {
       setIsApprovalDialogOpen(false);
       setSelectedApp(null);
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Failed to approve application");
     },
   });
@@ -112,7 +107,7 @@ const AdminTokensPage = () => {
       setSelectedApp(null);
       setRejectionReason("");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Failed to reject application");
     },
   });
@@ -204,7 +199,10 @@ const AdminTokensPage = () => {
 
         <div className="space-y-2">
           <Label>Sort Order</Label>
-          <Select value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
+          <Select
+            value={sortBy}
+            onValueChange={(v: string) => setSortBy(v as "asc" | "desc")}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
@@ -236,9 +234,11 @@ const AdminTokensPage = () => {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         {app.logoUrl ? (
-                          <img
+                          <NextImage
                             src={app.logoUrl}
                             alt={app.symbol}
+                            width={32}
+                            height={32}
                             className="w-8 h-8 rounded-full bg-zinc-100"
                           />
                         ) : (

@@ -4,11 +4,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import { ReactNode, useState } from "react";
 import { PrivyProvider } from "@privy-io/react-auth";
-import { useRouter } from "next/navigation";
-import AuthSync from "@/components/AuthSync";
+import AuthSync from "../components/AuthSync";
 
 export default function Providers({ children }: { children: ReactNode }) {
-  const router = useRouter();
   // We use useState to ensure the QueryClient is only created once
   const [queryClient] = useState(
     () =>
@@ -19,7 +17,7 @@ export default function Providers({ children }: { children: ReactNode }) {
             retry: 1,
           },
         },
-      })
+      }),
   );
 
   return (

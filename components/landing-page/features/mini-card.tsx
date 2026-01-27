@@ -1,4 +1,5 @@
 import React from "react";
+import NextImage from "next/image";
 
 interface MiniCardProps {
   images: string[];
@@ -17,17 +18,19 @@ const MiniCard: React.FC<MiniCardProps> = ({
     >
       <div className="flex flex-wrap gap-2 sm:gap-3">
         {images.map((img, idx) => {
-          const randomRotation = Math.random() * 20 - 10;
+          // Deterministic rotation based on index to avoid hydration mismatch
+          const rotation = (idx % 2 === 0 ? 1 : -1) * (((idx * 5) % 10) + 2);
           return (
-            <img
+            <NextImage
               key={idx}
               src={img}
+              width={80}
+              height={80}
               style={{
-                transform: `rotate(${randomRotation}deg)`,
+                transform: `rotate(${rotation}deg)`,
               }}
               alt={title || "Mini Card Image"}
               className="h-12 w-12 sm:h-16 sm:w-16 lg:h-20 lg:w-20 rounded-lg sm:rounded-xl border border-zinc-400 shadow-lg shadow-black rotate-2"
-              loading="lazy"
             />
           );
         })}
