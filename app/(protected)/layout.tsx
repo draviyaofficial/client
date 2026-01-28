@@ -146,7 +146,7 @@ export default function ProtectedLayout({
             {/* Creator Only Links */}
             {user?.role === "CREATOR" && (
               <Link
-                href="/token/launch"
+                href="/token"
                 className="group flex items-center gap-3 rounded-lg text-sm font-medium transition-colors"
                 onClick={() => setSidebarOpen(false)}
               >
@@ -158,19 +158,19 @@ export default function ProtectedLayout({
                 <Rocket
                   className={cn(
                     "h-6 w-6 shrink-0",
-                    pathname === "/token/launch"
+                    pathname === "/token"
                       ? "text-[#F2723B]"
                       : "text-zinc-400 group-hover:text-zinc-600",
                   )}
                 />
                 <div
                   className={`text-xl ${
-                    pathname === "/token/launch"
+                    pathname === "/token"
                       ? "text-zinc-800 font-semibold"
                       : "text-zinc-400"
                   }`}
                 >
-                  Token Launch
+                  Token Dashboard
                 </div>
               </Link>
             )}

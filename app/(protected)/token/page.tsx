@@ -36,9 +36,15 @@ import {
   TrendingUp,
   Users,
   Coins,
+  Calendar,
+  Target,
+  Clock,
+  DollarSign,
+  Rocket,
 } from "lucide-react";
 import NextImage from "next/image";
 import ImageUpload from "@/components/ui/image-upload";
+import { StatCard } from "@/components/dashboard/StatCard";
 
 // Schema Validation
 const tokenSchema = z.object({
@@ -224,155 +230,310 @@ export default function TokenLaunchPage() {
   }
 
   if (existingToken) {
+    const iro = existingToken.user?.createdToken?.iro;
+    const createdToken = existingToken.user?.createdToken;
+
+    const stats = [
+      {
+        title: "Total Supply",
+        value: createdToken?.totalSupply
+          ? parseInt(createdToken.totalSupply).toLocaleString()
+          : parseInt(existingToken.initialSupply).toLocaleString(),
+        change: "Fixed Supply",
+        icon: Coins,
+        variant: "orange" as const,
+      },
+      {
+        title: "IRO Status",
+        value: iro?.status || "Not Scheduled",
+        change: iro ? "Active Phase" : "Pending Admin",
+        icon: Rocket,
+      },
+      {
+        title: "Funds Raised",
+        value: iro
+          ? `$${parseFloat(iro.amountRaised).toLocaleString()}`
+          : "$0.00",
+        change: iro
+          ? `${(
+              (parseFloat(iro.amountRaised) / parseFloat(iro.hardCap)) *
+              100
+            ).toFixed(1)}% of Hard Cap`
+          : "N/A",
+        icon: DollarSign,
+      },
+      {
+        title: "Token Price",
+        value: iro ? `$${iro.tokenPrice}` : "TBD",
+        change: "Initial Offering",
+        icon: Target,
+      },
+    ];
+
     return (
-      <div className="max-w-4xl mx-auto py-10 space-y-6">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-zinc-900">
-            Your Token Dashboard
-          </h1>
-          <p className="text-zinc-500">
-            Real-time analytics from Solana Devnet.
-          </p>
+      <div className="space-y-8 bg-white rounded-xl p-10">
+        <div className="flex items-center justify-between mb-12">
+          <div>
+            <h1 className="text-5xl font-semibold tracking-tight text-zinc-900">
+              Token Dashboard
+            </h1>
+            <p className="text-zinc-400 mt-1 text-lg">
+              Manage your asset and monitor IRO performance.
+            </p>
+          </div>
+          <div
+            className={`px-4 py-2 rounded-full text-sm font-bold border ${
+              existingToken.status === "APPROVED"
+                ? "bg-green-100 text-green-700 border-green-200"
+                : existingToken.status === "REJECTED"
+                  ? "bg-red-100 text-red-700 border-red-200"
+                  : "bg-blue-100 text-blue-700 border-blue-200"
+            }`}
+          >
+            Application: {existingToken.status}
+          </div>
         </div>
 
-        {/* Token Identity Card */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                {existingToken.logoUrl && (
-                  <NextImage
-                    src={
-                      imgError
-                        ? "https://placehold.co/64x64?text=TOKEN"
-                        : existingToken.logoUrl
-                    }
-                    alt={existingToken.symbol}
-                    width={64}
-                    height={64}
-                    className="w-16 h-16 rounded-full shadow-sm"
-                    onError={() => setImgError(true)}
-                  />
-                )}
-                <div>
-                  <CardTitle className="text-2xl">
-                    {existingToken.name}
-                  </CardTitle>
-                  <CardDescription className="text-lg font-medium text-[#F2723B]">
-                    ${existingToken.symbol}
-                  </CardDescription>
-                </div>
-              </div>
-              <div
-                className={`px-4 py-1.5 rounded-full text-sm font-bold border ${
-                  existingToken.status === "APPROVED"
-                    ? "bg-green-100 text-green-700 border-green-200"
-                    : existingToken.status === "REJECTED"
-                      ? "bg-red-100 text-red-700 border-red-200"
-                      : "bg-blue-100 text-blue-700 border-blue-200"
-                }`}
-              >
-                {existingToken.status}
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-zinc-700">{existingToken.description}</p>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          {stats.map((stat, index) => (
+            <StatCard key={index} {...stat} />
+          ))}
+        </div>
 
-            {existingToken.status === "REJECTED" &&
-              existingToken.rejectionReason && (
-                <div className="bg-red-50 p-4 rounded-lg border border-red-100 text-red-700 text-sm mt-4">
-                  <span className="font-bold">Rejection Reason:</span>{" "}
-                  {existingToken.rejectionReason}
-                </div>
-              )}
-          </CardContent>
-        </Card>
-
-        {/* Analytics Grid - Only show if Approved (Minted) */}
-        {existingToken.status === "APPROVED" && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-zinc-500 flex items-center gap-2">
-                  <Coins className="w-4 h-4" /> Total Supply
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-zinc-900">
-                  {isLoadingAnalytics ? (
-                    <Loader2 className="h-6 w-6 animate-spin text-zinc-300" />
-                  ) : (
-                    analytics?.supply?.toLocaleString() ||
-                    parseInt(existingToken.initialSupply).toLocaleString()
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-zinc-500 flex items-center gap-2">
-                  <Users className="w-4 h-4" /> Holders
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-zinc-900">
-                  {isLoadingAnalytics ? (
-                    <Loader2 className="h-6 w-6 animate-spin text-zinc-300" />
-                  ) : (
-                    analytics?.holders?.toLocaleString() || "N/A"
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-zinc-500 flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4" /> Market Cap
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-zinc-900">$0.00</div>
-                <p className="text-xs text-zinc-400 mt-1">Pre-market</p>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Top Holders Table */}
-        {existingToken.status === "APPROVED" && analytics?.topHolders && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Top Holders</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {analytics.topHolders.slice(0, 5).map((holder, i) => (
-                  <div
-                    key={holder.address}
-                    className="flex items-center justify-between text-sm"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 rounded-full bg-zinc-100 flex items-center justify-center text-xs font-bold text-zinc-500">
-                        {i + 1}
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column: Token Identity & IRO Details */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Token Identity Card */}
+            <Card className="border-zinc-200 shadow-sm overflow-hidden">
+              <CardHeader className="bg-zinc-50/50 border-b border-zinc-100 pb-8">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-6">
+                    {existingToken.logoUrl ? (
+                      <NextImage
+                        src={existingToken.logoUrl}
+                        alt={existingToken.symbol}
+                        width={96}
+                        height={96}
+                        className="w-24 h-24 rounded-full shadow-lg border-4 border-white"
+                        onError={() => setImgError(true)}
+                      />
+                    ) : (
+                      <div className="w-24 h-24 rounded-full bg-zinc-200 flex items-center justify-center text-zinc-400 font-bold text-xl shadow-lg border-4 border-white">
+                        {existingToken.symbol.slice(0, 2)}
                       </div>
-                      <div className="font-mono text-zinc-600">
-                        {holder.address.slice(0, 4)}...
-                        {holder.address.slice(-4)}
-                      </div>
-                    </div>
-                    <div className="text-zinc-900 font-medium">
-                      {holder.amount.toLocaleString()} (
-                      {holder.percentage.toFixed(2)}%)
+                    )}
+                    <div className="space-y-1">
+                      <CardTitle className="text-3xl font-bold text-zinc-900">
+                        {existingToken.name}
+                      </CardTitle>
+                      <CardDescription className="text-xl font-medium text-[#F2723B]">
+                        ${existingToken.symbol}
+                      </CardDescription>
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                </div>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="prose prose-zinc max-w-none">
+                  <h3 className="text-lg font-semibold text-zinc-900 mb-2">
+                    About Project
+                  </h3>
+                  <p className="text-zinc-600 leading-relaxed">
+                    {existingToken.description}
+                  </p>
+                </div>
+
+                {existingToken.status === "REJECTED" &&
+                  existingToken.rejectionReason && (
+                    <div className="mt-6 bg-red-50 p-4 rounded-lg border border-red-100">
+                      <h4 className="font-semibold text-red-900 mb-1 flex items-center gap-2">
+                        <XCircle className="w-4 h-4" /> Rejection Reason
+                      </h4>
+                      <p className="text-red-800 text-sm">
+                        {existingToken.rejectionReason}
+                      </p>
+                    </div>
+                  )}
+
+                <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-zinc-100">
+                  {existingToken.websiteUrl && (
+                    <a
+                      href={existingToken.websiteUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sm font-medium text-zinc-500 hover:text-[#F2723B] transition-colors"
+                    >
+                      Website ↗
+                    </a>
+                  )}
+                  {existingToken.twitterUrl && (
+                    <a
+                      href={existingToken.twitterUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sm font-medium text-zinc-500 hover:text-[#F2723B] transition-colors"
+                    >
+                      Twitter ↗
+                    </a>
+                  )}
+                  {existingToken.telegramUrl && (
+                    <a
+                      href={existingToken.telegramUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sm font-medium text-zinc-500 hover:text-[#F2723B] transition-colors"
+                    >
+                      Telegram ↗
+                    </a>
+                  )}
+                  {existingToken.discordUrl && (
+                    <a
+                      href={existingToken.discordUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sm font-medium text-zinc-500 hover:text-[#F2723B] transition-colors"
+                    >
+                      Discord ↗
+                    </a>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* IRO Detailed Stats (If exists) */}
+            {iro && (
+              <Card className="border-l-4 border-l-[#F2723B] shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Rocket className="w-5 h-5 text-[#F2723B]" />
+                    IRO Trajectory
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Progress Bar */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm font-medium">
+                      <span className="text-zinc-600">Progress</span>
+                      <span className="text-zinc-900">
+                        {(
+                          (parseFloat(iro.amountRaised) /
+                            parseFloat(iro.hardCap)) *
+                          100
+                        ).toFixed(1)}
+                        %
+                      </span>
+                    </div>
+                    <div className="h-4 w-full bg-zinc-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-[#F2723B] to-[#fcb65a] transition-all duration-500"
+                        style={{
+                          width: `${(parseFloat(iro.amountRaised) / parseFloat(iro.hardCap)) * 100}%`,
+                        }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-xs text-zinc-400">
+                      <span>{iro.amountRaised} SOL Raised</span>
+                      <span>Target: {iro.hardCap} SOL</span>
+                    </div>
+                  </div>
+
+                  {/* Dates */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-zinc-50 rounded-lg border border-zinc-100">
+                      <div className="flex items-center gap-2 text-zinc-500 mb-1">
+                        <Calendar className="w-4 h-4" />
+                        <span className="text-xs font-medium uppercase tracking-wider">
+                          Start Date
+                        </span>
+                      </div>
+                      <p className="font-semibold text-zinc-900">
+                        {new Date(iro.startTime).toLocaleDateString()}
+                      </p>
+                      <p className="text-xs text-zinc-500">
+                        {new Date(iro.startTime).toLocaleTimeString()}
+                      </p>
+                    </div>
+                    <div className="p-4 bg-zinc-50 rounded-lg border border-zinc-100">
+                      <div className="flex items-center gap-2 text-zinc-500 mb-1">
+                        <Clock className="w-4 h-4" />
+                        <span className="text-xs font-medium uppercase tracking-wider">
+                          End Date
+                        </span>
+                      </div>
+                      <p className="font-semibold text-zinc-900">
+                        {new Date(iro.endTime).toLocaleDateString()}
+                      </p>
+                      <p className="text-xs text-zinc-500">
+                        {new Date(iro.endTime).toLocaleTimeString()}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Right Column: Holders & Analytics */}
+          <div className="space-y-8">
+            {/* Top Holders */}
+            {existingToken.status === "APPROVED" && (
+              <Card className="h-full shadow-sm">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Users className="w-5 h-5 text-zinc-500" />
+                    Top Holders
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingAnalytics ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-zinc-300" />
+                    </div>
+                  ) : analytics?.topHolders?.length ? (
+                    <div className="space-y-4">
+                      {analytics.topHolders.slice(0, 5).map((holder, i) => (
+                        <div
+                          key={holder.address}
+                          className="flex items-center justify-between text-sm group hover:bg-zinc-50 p-2 rounded-lg transition-colors cursor-default"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-[#f9efe3] text-[#F2723B] flex items-center justify-center text-xs font-bold ring-2 ring-white shadow-sm">
+                              {i + 1}
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="font-mono text-zinc-900 font-medium text-xs">
+                                {holder.address.slice(0, 4)}...
+                                {holder.address.slice(-4)}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-zinc-900 font-semibold">
+                              {holder.percentage.toFixed(2)}%
+                            </div>
+                            <div className="text-xs text-zinc-400">
+                              {parseInt(
+                                holder.amount.toString(),
+                              ).toLocaleString()}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-zinc-500 text-sm">
+                      {existingToken.mintAddress
+                        ? "No holder data available yet."
+                        : "Token not yet minted."}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
       </div>
     );
   }

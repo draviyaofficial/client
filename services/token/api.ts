@@ -29,6 +29,24 @@ export interface TokenApplication {
   user?: {
     firstName?: string;
     email?: string;
+    createdToken?: {
+      id: string;
+      name: string;
+      symbol: string;
+      totalSupply: string;
+      mintAddress: string | null;
+      iro?: {
+        id: string;
+        status: "SCHEDULED" | "LIVE" | "COMPLETED" | "FAILED";
+        startTime: string;
+        endTime: string;
+        hardCap: string;
+        softCap: string;
+        amountRaised: string;
+        tokensSold: string;
+        tokenPrice: string;
+      };
+    };
   };
 }
 
