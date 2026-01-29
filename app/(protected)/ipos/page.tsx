@@ -48,29 +48,26 @@ export default function IPOsPage() {
 
       const endTime = new Date(iro.endTime);
       const now = new Date();
+      const diffTime = endTime.getTime() - now.getTime();
+      const daysLeft =
+        diffTime > 0 ? Math.ceil(diffTime / (1000 * 60 * 60 * 24)) : 0;
 
-      // Simple progress calculation (time-based for now as we don't have sold amounts in response?)
-      // The response structure needs to be checked. For now assuming we display it based on known data.
-      // Wait, the API returns IRO data which might not have 'raised' amount if it's not in the schema/response.
-      // Looking at controller: returns token, user, etc.
-
-      const daysLeft = Math.ceil(
-        (endTime.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
-      );
+      const hardCap = parseFloat(iro.hardCap);
+      const totalRaised = parseFloat(iro.totalRaised || "0"); // Handle potentially missing totalRaised
+      const progress = hardCap > 0 ? (totalRaised / hardCap) * 100 : 0;
 
       return {
         ...iro,
-        daysLeft: daysLeft > 0 ? daysLeft : 0,
-        // Mocking some display data derived from real data
-        progress: 0, // Need 'sold' amount from backend to calculate real progress
-        raised: "$0", // Placeholder
-        valuation: "N/A",
+        daysLeft,
+        progress: parseFloat(progress.toFixed(1)), // Round to 1 decimal
+        raised: `$${totalRaised.toLocaleString()}`,
+        valuation: "N/A", // Valuation typically implies market cap or FDV, could be calculated if needed: tokenPrice * totalSupply
         category: iro.token.user.creatorProfile?.sector || "Uncategorized",
         creatorName:
           iro.token.user.creatorProfile?.displayName ||
           iro.token.user.creatorProfile?.sector ||
           "Unknown Creator",
-        avatar: iro.token.user.creatorProfile?.profilePicUrl,
+        avatar: iro.token.user.profilePicUrl,
       };
     }) || [];
 
@@ -91,7 +88,6 @@ export default function IPOsPage() {
     switch (sortBy) {
       case "daysLeft":
         return a.daysLeft - b.daysLeft;
-      // Other sorts might be less effective without real numerical data like 'raised'
       default:
         return 0;
     }
@@ -146,7 +142,7 @@ export default function IPOsPage() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="appearance-none bg-white border border-zinc-200 rounded-lg px-4 py-2.5 pr-8 focus:ring-2 focus:ring-[#F2723B] focus:border-{#F2723B]"
+            className="appearance-none bg-white border border-zinc-200 rounded-lg px-4 py-2.5 pr-8 focus:ring-2 focus:ring-[#F2723B] focus:border-[#F2723B]"
           >
             <option value="daysLeft">Ending Soon</option>
             {/* Removed other options as we lack data to sort by them meaningfully yet */}
@@ -215,7 +211,7 @@ export default function IPOsPage() {
                   Ticker: <span className="uppercase">{ipo.token.symbol}</span>
                 </p>
                 <p className="mt-1">
-                  Hard Cap: ${ipo.hardCap.toLocaleString()}
+                  Hard Cap: ${parseFloat(ipo.hardCap).toLocaleString()}
                 </p>
               </div>
 
@@ -226,7 +222,7 @@ export default function IPOsPage() {
                     Raised: {ipo.raised}
                   </span>
                   <span className="text-zinc-500">
-                    Goal: ${ipo.hardCap.toLocaleString()}
+                    Goal: ${parseFloat(ipo.hardCap).toLocaleString()}
                   </span>
                 </div>
                 <div className="w-full bg-zinc-200 rounded-full h-2">
