@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import { ReactNode, useState } from "react";
+import { createSolanaRpc, createSolanaRpcSubscriptions } from "@solana/kit";
 import { PrivyProvider } from "@privy-io/react-auth";
 import AuthSync from "../components/AuthSync";
 
@@ -28,8 +29,18 @@ export default function Providers({ children }: { children: ReactNode }) {
           theme: "light",
           accentColor: "#676FFF",
         },
+        solana: {
+          rpcs: {
+            "solana:devnet": {
+              rpc: createSolanaRpc("https://api.devnet.solana.com"),
+              rpcSubscriptions: createSolanaRpcSubscriptions(
+                "wss://api.devnet.solana.com",
+              ),
+            },
+          },
+        },
         embeddedWallets: {
-          ethereum: {
+          solana: {
             createOnLogin: "users-without-wallets",
           },
         },
