@@ -73,10 +73,10 @@ export default function DashboardPage() {
                 {isLoadingPortfolio ? (
                   <span className="animate-pulse opacity-50">...</span>
                 ) : (
-                  `$${totalValue.toLocaleString(undefined, {
+                  `${totalValue.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
-                  })}`
+                  })} SOL`
                 )}
               </h2>
             </div>

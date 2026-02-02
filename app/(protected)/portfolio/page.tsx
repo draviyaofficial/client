@@ -73,10 +73,10 @@ export default function PortfolioPage() {
                 {isLoading ? (
                   <span className="animate-pulse opacity-50">Loading...</span>
                 ) : (
-                  `$${totalValue.toLocaleString(undefined, {
+                  `${totalValue.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
-                  })}`
+                  })} SOL`
                 )}
               </h2>
             </div>
@@ -144,8 +144,8 @@ export default function PortfolioPage() {
             {isLoading
               ? "..."
               : totalTokens > 0
-                ? `$${(totalValue / totalTokens).toLocaleString(undefined, { maximumFractionDigits: 0 })}`
-                : "$0"}
+                ? `${(totalValue / totalTokens).toLocaleString(undefined, { maximumFractionDigits: 0 })} SOL`
+                : "0 SOL"}
           </p>
           <p className="text-xs text-zinc-500 mt-1">Per value</p>
         </div>
@@ -217,12 +217,12 @@ export default function PortfolioPage() {
                       <div className="text-xs text-zinc-500">Tokens Owned</div>
                     </div>
 
-                    <div className="text-right w-24">
+                    <div className="text-right w-32">
                       <div className="text-sm font-medium text-zinc-900">
-                        ${item.currentValue.toLocaleString()}
+                        {item.currentValue.toLocaleString()} SOL
                       </div>
                       <div className="text-xs text-zinc-500">
-                        @ ${item.currentPrice.toFixed(4)}
+                        @ {item.currentPrice.toFixed(4)} SOL
                       </div>
                     </div>
                   </div>
