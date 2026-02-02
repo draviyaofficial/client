@@ -231,7 +231,7 @@ export default function TokenLaunchPage() {
   if (isLoadingToken) {
     return (
       <div className="flex h-[80vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[#F2723B]" />
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
       </div>
     );
   }
@@ -248,7 +248,6 @@ export default function TokenLaunchPage() {
           : parseInt(existingToken.initialSupply).toLocaleString(),
         change: "Fixed Supply",
         icon: Coins,
-        variant: "orange" as const,
       },
       {
         title: "IRO Status",
@@ -269,12 +268,14 @@ export default function TokenLaunchPage() {
               ).toFixed(1)}% of Hard Cap`
             : "N/A",
         icon: DollarSign,
+        variant: "gradient" as const,
       },
       {
         title: "Token Price",
         value: iro ? `$${iro.tokenPrice}` : "TBD",
         change: "Initial Offering",
         icon: Target,
+        variant: "gradient" as const,
       },
     ];
 
@@ -371,7 +372,7 @@ export default function TokenLaunchPage() {
                       href={existingToken.websiteUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-sm font-medium text-zinc-500 hover:text-[#F2723B] transition-colors"
+                      className="text-sm font-medium text-zinc-500 hover:text-indigo-600 transition-colors"
                     >
                       Website ↗
                     </a>
@@ -381,7 +382,7 @@ export default function TokenLaunchPage() {
                       href={existingToken.twitterUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-sm font-medium text-zinc-500 hover:text-[#F2723B] transition-colors"
+                      className="text-sm font-medium text-zinc-500 hover:text-indigo-600 transition-colors"
                     >
                       Twitter ↗
                     </a>
@@ -391,7 +392,7 @@ export default function TokenLaunchPage() {
                       href={existingToken.telegramUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-sm font-medium text-zinc-500 hover:text-[#F2723B] transition-colors"
+                      className="text-sm font-medium text-zinc-500 hover:text-indigo-600 transition-colors"
                     >
                       Telegram ↗
                     </a>
@@ -401,7 +402,7 @@ export default function TokenLaunchPage() {
                       href={existingToken.discordUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-sm font-medium text-zinc-500 hover:text-[#F2723B] transition-colors"
+                      className="text-sm font-medium text-zinc-500 hover:text-indigo-600 transition-colors"
                     >
                       Discord ↗
                     </a>
@@ -515,7 +516,7 @@ export default function TokenLaunchPage() {
                           className="flex items-center justify-between text-sm group hover:bg-zinc-50 p-2 rounded-lg transition-colors cursor-default"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-[#f9efe3] text-[#F2723B] flex items-center justify-center text-xs font-bold ring-2 ring-white shadow-sm">
+                            <div className="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-bold ring-2 ring-white shadow-sm">
                               {i + 1}
                             </div>
                             <div className="flex flex-col">
