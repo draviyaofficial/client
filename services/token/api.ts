@@ -42,7 +42,7 @@ export interface TokenApplication {
         endTime: string;
         hardCap: string;
         softCap: string;
-        amountRaised: string;
+        totalRaised: string;
         tokensSold: string;
         tokenPrice: string;
       };

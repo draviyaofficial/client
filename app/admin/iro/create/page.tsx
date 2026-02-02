@@ -33,10 +33,12 @@ const createIROSchema = z
     tokenId: z.string().min(1, "Token selection is required"),
     startTime: z.string().min(1, "Start time is required"),
     endTime: z.string().min(1, "End time is required"),
+    softCap: z.coerce.number().positive("Soft cap must be positive"),
     hardCap: z.coerce.number().positive("Hard cap must be positive"),
     tokensForSale: z.coerce
       .number()
       .positive("Tokens for sale must be positive"),
+    tokenPrice: z.coerce.number().positive("Token price must be positive"),
     vestingPeriod: z.coerce.number().min(0, "Vesting period must be 0 or more"),
     cliffPeriod: z.coerce.number().min(0, "Cliff period must be 0 or more"),
   })
@@ -93,7 +95,9 @@ export default function CreateIROPage() {
       startTime: "",
       endTime: "",
       hardCap: 0,
+      softCap: 0,
       tokensForSale: 0,
+      tokenPrice: 0,
       vestingPeriod: 0,
       cliffPeriod: 0,
     },
@@ -245,11 +249,26 @@ export default function CreateIROPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="hardCap">Hard Cap ($)</Label>
+                <Label htmlFor="softCap">Soft Cap (SOL)</Label>
+                <Input
+                  id="softCap"
+                  type="number"
+                  placeholder="e.g. 100"
+                  {...register("softCap")}
+                />
+                {errors.softCap && (
+                  <p className="text-sm text-red-500">
+                    {errors.softCap.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="hardCap">Hard Cap (SOL)</Label>
                 <Input
                   id="hardCap"
                   type="number"
-                  placeholder="e.g. 500000"
+                  placeholder="e.g. 1000"
                   {...register("hardCap")}
                 />
                 {errors.hardCap && (
@@ -258,18 +277,36 @@ export default function CreateIROPage() {
                   </p>
                 )}
               </div>
+            </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="tokensForSale">Tokens For Sale</Label>
                 <Input
                   id="tokensForSale"
                   type="number"
-                  placeholder="e.g. 100000"
+                  placeholder="e.g. 1000000"
                   {...register("tokensForSale")}
                 />
                 {errors.tokensForSale && (
                   <p className="text-sm text-red-500">
                     {errors.tokensForSale.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="tokenPrice">Token Price (SOL)</Label>
+                <Input
+                  id="tokenPrice"
+                  type="number"
+                  step="0.000001"
+                  placeholder="e.g. 0.001"
+                  {...register("tokenPrice")}
+                />
+                {errors.tokenPrice && (
+                  <p className="text-sm text-red-500">
+                    {errors.tokenPrice.message}
                   </p>
                 )}
               </div>

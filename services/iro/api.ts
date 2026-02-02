@@ -9,8 +9,12 @@ export interface IRO {
   tokenId: string;
   startTime: string;
   endTime: string;
-  hardCap: number;
-  tokensForSale: number;
+  hardCap: string;
+  softCap: string;
+  tokensForSale: string;
+  tokenPrice: string;
+  totalRaised: string;
+  tokensSold: string;
   vestingPeriod: number;
   cliffPeriod: number;
   status: "SCHEDULED" | "LIVE" | "COMPLETED" | "FAILED";

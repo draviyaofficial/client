@@ -107,6 +107,13 @@ export default function TokenLaunchPage() {
       return await getTokenAnalytics(existingToken.mintAddress);
     },
     enabled: !!existingToken && existingToken.status === "APPROVED", // Only fetch if approved/minted
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    refetchOnWindowFocus: false,
+    retry: (failureCount, error: any) => {
+      // Don't retry on 429s immediately or too many times
+      if (error?.message?.includes("429")) return false;
+      return failureCount < 3;
+    },
   });
 
   const form = useForm<TokenFormValues>({
@@ -252,14 +259,15 @@ export default function TokenLaunchPage() {
       {
         title: "Funds Raised",
         value: iro
-          ? `$${parseFloat(iro.amountRaised).toLocaleString()}`
+          ? `$${parseFloat(iro.totalRaised).toLocaleString()}`
           : "$0.00",
-        change: iro
-          ? `${(
-              (parseFloat(iro.amountRaised) / parseFloat(iro.hardCap)) *
-              100
-            ).toFixed(1)}% of Hard Cap`
-          : "N/A",
+        change:
+          iro && parseFloat(iro.hardCap) > 0
+            ? `${(
+                (parseFloat(iro.totalRaised) / parseFloat(iro.hardCap)) *
+                100
+              ).toFixed(1)}% of Hard Cap`
+            : "N/A",
         icon: DollarSign,
       },
       {
@@ -417,24 +425,32 @@ export default function TokenLaunchPage() {
                     <div className="flex justify-between text-sm font-medium">
                       <span className="text-zinc-600">Progress</span>
                       <span className="text-zinc-900">
-                        {(
-                          (parseFloat(iro.amountRaised) /
-                            parseFloat(iro.hardCap)) *
-                          100
-                        ).toFixed(1)}
+                        {parseFloat(iro.hardCap) > 0
+                          ? (
+                              (parseFloat(iro.totalRaised) /
+                                parseFloat(iro.hardCap)) *
+                              100
+                            ).toFixed(1)
+                          : "0.0"}
                         %
                       </span>
                     </div>
                     <div className="h-4 w-full bg-zinc-100 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-[#F2723B] to-[#fcb65a] transition-all duration-500"
+                        className="h-full bg-linear-to-r from-[#F2723B] to-[#fcb65a] transition-all duration-500"
                         style={{
-                          width: `${(parseFloat(iro.amountRaised) / parseFloat(iro.hardCap)) * 100}%`,
+                          width: `${
+                            parseFloat(iro.hardCap) > 0
+                              ? (parseFloat(iro.totalRaised) /
+                                  parseFloat(iro.hardCap)) *
+                                100
+                              : 0
+                          }%`,
                         }}
                       />
                     </div>
                     <div className="flex justify-between text-xs text-zinc-400">
-                      <span>{iro.amountRaised} SOL Raised</span>
+                      <span>{iro.totalRaised} SOL Raised</span>
                       <span>Target: {iro.hardCap} SOL</span>
                     </div>
                   </div>

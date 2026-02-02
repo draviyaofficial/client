@@ -161,8 +161,10 @@ export interface CreateIROInput {
   tokenId: string;
   startTime: string;
   endTime: string;
+  softCap: number;
   hardCap: number;
   tokensForSale: number;
+  tokenPrice: number;
   vestingPeriod: number;
   cliffPeriod: number;
 }

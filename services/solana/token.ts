@@ -1,9 +1,5 @@
 import { Connection, PublicKey } from "@solana/web3.js";
-
-const SOLANA_RPC_URL =
-  process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.devnet.solana.com";
-
-const connection = new Connection(SOLANA_RPC_URL, "confirmed");
+import { connection } from "./connection";
 
 export interface TokenAnalytics {
   supply: number;
@@ -50,6 +46,9 @@ export const getTokenAnalytics = async (
     };
   } catch (error) {
     console.error("Failed to fetch token analytics:", error);
-    throw new Error("Failed to fetch on-chain data");
+    // Propagate the original error message so we can detect 429s
+    throw error instanceof Error
+      ? error
+      : new Error("Failed to fetch on-chain data");
   }
 };

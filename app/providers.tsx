@@ -7,6 +7,19 @@ import { createSolanaRpc, createSolanaRpcSubscriptions } from "@solana/kit";
 import { PrivyProvider } from "@privy-io/react-auth";
 import AuthSync from "../components/AuthSync";
 
+const isProduction = process.env.NODE_ENV === "production";
+const SOLANA_NETWORK = isProduction ? "solana:mainnet" : "solana:devnet";
+const SOLANA_RPC_URL =
+  process.env.NEXT_PUBLIC_SOLANA_RPC_URL ||
+  (isProduction
+    ? "https://api.mainnet-beta.solana.com"
+    : "https://api.devnet.solana.com");
+const SOLANA_WSS_URL =
+  process.env.NEXT_PUBLIC_SOLANA_WSS_URL ||
+  (isProduction
+    ? "wss://api.mainnet-beta.solana.com"
+    : "wss://api.devnet.solana.com");
+
 export default function Providers({ children }: { children: ReactNode }) {
   // We use useState to ensure the QueryClient is only created once
   const [queryClient] = useState(
@@ -31,11 +44,9 @@ export default function Providers({ children }: { children: ReactNode }) {
         },
         solana: {
           rpcs: {
-            "solana:devnet": {
-              rpc: createSolanaRpc("https://api.devnet.solana.com"),
-              rpcSubscriptions: createSolanaRpcSubscriptions(
-                "wss://api.devnet.solana.com",
-              ),
+            [SOLANA_NETWORK]: {
+              rpc: createSolanaRpc(SOLANA_RPC_URL),
+              rpcSubscriptions: createSolanaRpcSubscriptions(SOLANA_WSS_URL),
             },
           },
         },

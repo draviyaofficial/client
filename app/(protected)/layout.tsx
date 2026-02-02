@@ -15,6 +15,7 @@ import {
   HelpCircle,
   LogOut,
   Rocket,
+  Wallet,
 } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "@/services/auth/model/hooks/useAuth";
@@ -26,6 +27,7 @@ const navigation = [
   { name: "Market", href: "/market", icon: TrendingUp },
   { name: "IPOs", href: "/ipos", icon: Building },
   { name: "Portfolio", href: "/portfolio", icon: Briefcase },
+  { name: "Wallet", href: "/wallet", icon: Wallet },
   { name: "Activity", href: "/activity", icon: Activity },
 ];
 

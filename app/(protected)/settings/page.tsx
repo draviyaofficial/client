@@ -2,17 +2,7 @@
 
 import React, { useState } from "react";
 import { useUser } from "@/services/auth/model/hooks/useUser";
-import {
-  Wallet,
-  Shield,
-  Bell,
-  User,
-  Copy,
-  Check,
-  Save,
-  AlertTriangle,
-  X,
-} from "lucide-react";
+import { Shield, Bell, User, Save, AlertTriangle, X } from "lucide-react";
 
 import { usePrivy } from "@privy-io/react-auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -92,7 +82,6 @@ export default function SettingsPage() {
     },
   });
 
-  const [copied, setCopied] = useState(false);
   const [notifications, setNotifications] = useState({
     email: true,
     push: false,
@@ -100,16 +89,6 @@ export default function SettingsPage() {
     marketing: false,
   });
   const [kycStatus] = useState("pending"); // Mock KYC status
-
-  const handleCopy = () => {
-    const address = dbUser?.walletAddress || user?.walletAddress;
-    if (address) {
-      navigator.clipboard.writeText(address);
-      setCopied(true);
-      toast.success("Wallet address copied to clipboard");
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -143,20 +122,6 @@ export default function SettingsPage() {
           </div>
           <div className="flex justify-end">
             <Skeleton className="h-10 w-32" />
-          </div>
-        </div>
-
-        {/* Wallet Skeleton */}
-        <div className="space-y-6">
-          <Skeleton className="h-8 w-48" />
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-14 w-full" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-32 w-full" />
           </div>
         </div>
       </div>
@@ -275,69 +240,6 @@ export default function SettingsPage() {
             <Save className="h-4 w-4" />
             {isPending ? "Saving..." : "Save Changes"}
           </button>
-        </div>
-      </section>
-
-      {/* Wallet Settings */}
-      <section className="space-y-6">
-        <div className="flex items-center gap-2 border-b border-zinc-100 pb-4">
-          <Wallet className="h-6 w-6 text-zinc-400" />
-          <h2 className="text-2xl font-medium text-zinc-900">
-            Wallet Information
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 gap-6">
-          <label className="block text-sm font-medium text-zinc-700 mb-2">
-            Connected Wallet
-          </label>
-          <div className="flex items-center gap-3 p-4 bg-zinc-50 rounded-lg border border-zinc-100">
-            <Wallet className="h-5 w-5 text-zinc-600" />
-            <span className="font-mono text-sm text-zinc-900">
-              {dbUser?.walletAddress || user?.walletAddress ? (
-                `${(dbUser?.walletAddress || user?.walletAddress || "").slice(
-                  0,
-                  6,
-                )}...${(
-                  dbUser?.walletAddress ||
-                  user?.walletAddress ||
-                  ""
-                ).slice(-4)}`
-              ) : (
-                <span className="text-zinc-400 italic">
-                  No wallet connected
-                </span>
-              )}
-            </span>
-            {(dbUser?.walletAddress || user?.walletAddress) && (
-              <button
-                onClick={handleCopy}
-                className="ml-auto text-zinc-400 hover:text-zinc-600 transition-colors"
-                title="Copy wallet address"
-              >
-                {copied ? (
-                  <Check className="h-4 w-4 text-green-500" />
-                ) : (
-                  <Copy className="h-4 w-4" />
-                )}
-              </button>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center p-6 bg-zinc-50 rounded-xl border border-zinc-100">
-              <p className="text-3xl font-bold text-zinc-900">0</p>
-              <p className="text-sm text-zinc-500 mt-1">Tokens Held</p>
-            </div>
-            <div className="text-center p-6 bg-zinc-50 rounded-xl border border-zinc-100">
-              <p className="text-3xl font-bold text-zinc-900">$0.00</p>
-              <p className="text-sm text-zinc-500 mt-1">Portfolio Value</p>
-            </div>
-            <div className="text-center p-6 bg-zinc-50 rounded-xl border border-zinc-100">
-              <p className="text-3xl font-bold text-zinc-900">0</p>
-              <p className="text-sm text-zinc-500 mt-1">Transactions</p>
-            </div>
-          </div>
         </div>
       </section>
 
