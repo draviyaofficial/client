@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { Clock } from "lucide-react";
 
 interface CreatorCardProps {
@@ -11,9 +12,11 @@ interface CreatorCardProps {
   raised: string;
   daysLeft: number;
   category: string;
+  avatar?: string | null;
 }
 
 export function CreatorCard({
+  id,
   creator,
   name,
   description,
@@ -22,18 +25,27 @@ export function CreatorCard({
   raised,
   daysLeft,
   category,
+  avatar,
 }: CreatorCardProps) {
   return (
-    <div className="rounded-3xl border border-zinc-200 bg-white p-6">
+    <div className="rounded-3xl border border-zinc-200 bg-white p-6 flex flex-col h-full">
       <div className="flex items-center gap-4 mb-4">
-        <div className="h-12 w-12 rounded-full bg-[#f9efe3] flex items-center justify-center text-zinc-900 font-semibold text-sm">
-          {creator
-            .split(" ")
-            .map((n) => n[0])
-            .join("")
-            .slice(0, 2)
-            .toUpperCase()}
-        </div>
+        {avatar ? (
+          <img
+            src={avatar}
+            alt={creator}
+            className="h-12 w-12 rounded-full object-cover shadow-sm"
+          />
+        ) : (
+          <div className="h-12 w-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-700 font-semibold text-sm">
+            {creator
+              .split(" ")
+              .map((n) => n[0])
+              .join("")
+              .slice(0, 2)
+              .toUpperCase()}
+          </div>
+        )}
         <div className="flex-1">
           <h3 className="font-semibold text-zinc-900">{name}</h3>
           <p className="text-sm text-zinc-500">by {creator}</p>
@@ -51,9 +63,9 @@ export function CreatorCard({
           <span className="font-medium text-zinc-900">{raised}</span>
           <span className="text-zinc-500">{target}</span>
         </div>
-        <div className="w-full bg-zinc-200 rounded-full h-2">
+        <div className="w-full bg-zinc-100 rounded-full h-2">
           <div
-            className="bg-[#F2723B] h-2 rounded-full transition-all duration-300"
+            className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -66,9 +78,12 @@ export function CreatorCard({
           <Clock className="h-4 w-4" />
           <span>{daysLeft} days left</span>
         </div>
-        <button className="rounded-lg bg-[#F2723B] px-4 py-2 text-sm font-medium text-white transition-colors">
+        <Link
+          href={`/iros/${id}`}
+          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
+        >
           Participate
-        </button>
+        </Link>
       </div>
     </div>
   );

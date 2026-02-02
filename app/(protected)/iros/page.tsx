@@ -1,12 +1,20 @@
 "use client";
 
 import React, { useState } from "react";
-import { Clock, Search, Filter, Loader2, AlertCircle } from "lucide-react";
+import {
+  Clock,
+  Search,
+  Filter,
+  Loader2,
+  AlertCircle,
+  Activity,
+} from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { listIROsFn, IRO } from "@/services/iro/api";
 
-export default function IPOsPage() {
+export default function IROsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [sortBy, setSortBy] = useState("daysLeft");
@@ -21,7 +29,8 @@ export default function IPOsPage() {
       selectedCategory !== "All Categories" ? selectedCategory : undefined,
     ],
     queryFn: async () => {
-      return await listIROsFn({ status: "SCHEDULED" });
+      // Fetch LIVE IROs to ensure they show up
+      return await listIROsFn({ status: "LIVE" });
     },
   });
 
@@ -41,6 +50,7 @@ export default function IPOsPage() {
   */
 
   const iros = irosResponse?.data || [];
+  let totalRaisedSol = 0;
 
   const processedIROs =
     iros.map((iro: IRO) => {
@@ -54,13 +64,16 @@ export default function IPOsPage() {
 
       const hardCap = parseFloat(iro.hardCap);
       const totalRaised = parseFloat(iro.totalRaised || "0"); // Handle potentially missing totalRaised
+
+      totalRaisedSol += totalRaised;
+
       const progress = hardCap > 0 ? (totalRaised / hardCap) * 100 : 0;
 
       return {
         ...iro,
         daysLeft,
         progress: parseFloat(progress.toFixed(1)), // Round to 1 decimal
-        raised: `$${totalRaised.toLocaleString()}`,
+        raised: `${totalRaised.toLocaleString()} SOL`,
         valuation: "N/A", // Valuation typically implies market cap or FDV, could be calculated if needed: tokenPrice * totalSupply
         category: iro.token.user.creatorProfile?.sector || "Uncategorized",
         creatorName:
@@ -71,20 +84,20 @@ export default function IPOsPage() {
       };
     }) || [];
 
-  const filteredIPOs = processedIROs.filter((ipo) => {
+  const filteredIROs = processedIROs.filter((iro) => {
     const matchesSearch =
-      ipo.token.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ipo.creatorName.toLowerCase().includes(searchQuery.toLowerCase());
+      iro.token.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      iro.creatorName.toLowerCase().includes(searchQuery.toLowerCase());
 
     // Exact category match or All
     const matchesCategory =
       selectedCategory === "All Categories" ||
-      ipo.category === selectedCategory;
+      iro.category === selectedCategory;
 
     return matchesSearch && matchesCategory;
   });
 
-  const sortedIPOs = [...filteredIPOs].sort((a, b) => {
+  const sortedIROs = [...filteredIROs].sort((a, b) => {
     switch (sortBy) {
       case "daysLeft":
         return a.daysLeft - b.daysLeft;
@@ -94,16 +107,59 @@ export default function IPOsPage() {
   });
 
   return (
-    <div className="space-y-8 bg-white rounded-xl p-10 min-h-[96.3vh]">
+    <div className="space-y-8 bg-white rounded-xl p-10 min-h-[calc(100vh-2.5rem)]">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-5xl font-semibold tracking-tight text-zinc-900">
-            Initial Public Offerings
+            Initial Return Offerings
           </h1>
           <p className="text-zinc-400 text-lg mt-1">
             Invest in creator ventures before they go public.
           </p>
+        </div>
+      </div>
+
+      {/* Stats Section - New */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="p-6 rounded-xl border border-zinc-200 bg-white">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-lg bg-orange-50 text-[#F2723B]">
+              <Activity className="w-5 h-5" />
+            </div>
+            <span className="font-medium text-zinc-900">Active IROs</span>
+          </div>
+          <p className="text-2xl font-semibold text-zinc-900">{iros.length}</p>
+          <p className="text-xs text-zinc-500 mt-1">Currently live</p>
+        </div>
+
+        <div className="p-6 rounded-xl border border-zinc-200 bg-white">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-lg bg-green-50 text-green-600">
+              <code className="text-lg font-bold">$</code>
+            </div>
+            <span className="font-medium text-zinc-900">Total Raised</span>
+          </div>
+          <p className="text-2xl font-semibold text-zinc-900">
+            {totalRaisedSol.toLocaleString(undefined, {
+              maximumFractionDigits: 2,
+            })}{" "}
+            SOL
+          </p>
+          <p className="text-xs text-zinc-500 mt-1">Across all active IROs</p>
+        </div>
+
+        <div className="p-6 rounded-xl border border-zinc-200 bg-white">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-lg bg-blue-50 text-blue-600">
+              <Filter className="w-5 h-5" />
+            </div>
+            <span className="font-medium text-zinc-900">Categories</span>
+          </div>
+          <p className="text-2xl font-semibold text-zinc-900">
+            {new Set(iros.map((i) => i.token.user.creatorProfile?.sector)).size}
+          </p>
+          <p className="text-xs text-zinc-500 mt-1">Diverse sectors</p>
         </div>
       </div>
 
@@ -114,7 +170,7 @@ export default function IPOsPage() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-400" />
           <input
             type="text"
-            placeholder="Search IPOs..."
+            placeholder="Search IROs..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F2723B] focus:border-[#F2723B]"
@@ -164,30 +220,30 @@ export default function IPOsPage() {
             Failed to load IROs. Please try again later.
           </p>
         </div>
-      ) : sortedIPOs.length === 0 ? (
+      ) : sortedIROs.length === 0 ? (
         <div className="text-center py-20 text-zinc-500">
-          No IROs found matching your criteria.
+          No active IROs found.
         </div>
       ) : (
-        /* IPO Grid */
+        /* IRO Grid */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sortedIPOs.map((ipo) => (
+          {sortedIROs.map((iro) => (
             <div
-              key={ipo.id}
-              className="rounded-3xl border border-zinc-200 bg-white p-6"
+              key={iro.id}
+              className="rounded-3xl border border-zinc-200 bg-white p-6 flex flex-col hover:shadow-lg transition-shadow duration-300"
             >
               <div className="flex items-center gap-4 mb-4">
-                <div className="h-12 w-12 rounded-full bg-[#f9efe3] flex items-center justify-center text-zinc-900 font-semibold text-sm overflow-hidden">
-                  {ipo.avatar ? (
+                <div className="h-12 w-12 rounded-full bg-[#f9efe3] flex items-center justify-center text-zinc-900 font-semibold text-sm overflow-hidden shrink-0">
+                  {iro.avatar ? (
                     <Image
-                      src={ipo.avatar}
-                      alt={ipo.creatorName}
+                      src={iro.avatar}
+                      alt={iro.creatorName}
                       width={48}
                       height={48}
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    ipo.creatorName
+                    iro.creatorName
                       .split(" ")
                       .map((n) => n[0])
                       .join("")
@@ -195,61 +251,63 @@ export default function IPOsPage() {
                       .toUpperCase()
                   )}
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-zinc-900">
-                    {ipo.token.name}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-zinc-900 truncate">
+                    {iro.token.name}
                   </h3>
-                  <p className="text-sm text-zinc-500">by {ipo.creatorName}</p>
+                  <p className="text-sm text-zinc-500 truncate">
+                    by {iro.creatorName}
+                  </p>
                 </div>
-                <span className="rounded-full px-2.5 py-1 text-xs font-medium text-zinc-600 border border-zinc-300">
-                  {ipo.category}
+                <span className="rounded-full px-2.5 py-1 text-xs font-medium text-zinc-600 border border-zinc-300 shrink-0">
+                  {iro.category}
                 </span>
               </div>
 
               <div className="mb-4 text-sm text-zinc-600">
                 <p className="font-medium">
-                  Ticker: <span className="uppercase">{ipo.token.symbol}</span>
+                  Ticker: <span className="uppercase">{iro.token.symbol}</span>
                 </p>
                 <p className="mt-1">
-                  Hard Cap: ${parseFloat(ipo.hardCap).toLocaleString()}
+                  Hard Cap: ${parseFloat(iro.hardCap).toLocaleString()}
                 </p>
               </div>
 
-              {/* Progress Bar - Simplified since we lack 'raised' data */}
-              <div className="mb-4">
+              {/* Progress Bar */}
+              <div className="mb-6 flex-1">
                 <div className="flex items-center justify-between text-sm mb-2">
                   <span className="font-medium text-zinc-900">
-                    Raised: {ipo.raised}
+                    Raised: {iro.raised}
                   </span>
                   <span className="text-zinc-500">
-                    Goal: ${parseFloat(ipo.hardCap).toLocaleString()}
+                    Goal: ${parseFloat(iro.hardCap).toLocaleString()}
                   </span>
                 </div>
                 <div className="w-full bg-zinc-200 rounded-full h-2">
                   <div
                     className="bg-[#F2723B] h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${ipo.progress}%` }}
+                    style={{ width: `${iro.progress}%` }}
                   />
                 </div>
                 <div className="flex justify-between mt-1">
                   <p className="text-xs text-zinc-500">
-                    {ipo.progress}% funded
+                    {iro.progress}% funded
                   </p>
                 </div>
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between mt-4">
+              <div className="flex items-center justify-between mt-auto pt-4 border-t border-zinc-100">
                 <div className="flex items-center gap-1 text-sm text-zinc-500">
                   <Clock className="h-4 w-4" />
-                  <span>{ipo.daysLeft} days left</span>
+                  <span>{iro.daysLeft} days left</span>
                 </div>
-                <button
-                  disabled
-                  className="opacity-50 cursor-not-allowed rounded-lg bg-[#F2723B] px-4 py-2 text-sm font-medium text-white hover:bg-[#f2723be1] transition-colors"
+                <Link
+                  href={`/iros/${iro.id}`}
+                  className="rounded-lg bg-[#F2723B] px-4 py-2 text-sm font-medium text-white hover:bg-[#e06532] transition-colors"
                 >
-                  Coming Soon
-                </button>
+                  Participate
+                </Link>
               </div>
             </div>
           ))}

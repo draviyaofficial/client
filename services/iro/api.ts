@@ -17,17 +17,26 @@ export interface IRO {
   tokensSold: string;
   vestingPeriod: number;
   cliffPeriod: number;
+  minPurchase?: string; // Optional because it might not be in all responses
+  maxPurchase?: string; // Optional
   status: "SCHEDULED" | "LIVE" | "COMPLETED" | "FAILED";
   token: {
     id: string;
     name: string;
     symbol: string;
     mintAddress: string;
+    websiteUrl?: string; // Optional
+    twitterUrl?: string; // Optional
+    telegramUrl?: string; // Optional
+    discordUrl?: string; // Optional
+    description?: string; // Optional
+    logoUrl?: string; // Optional
     user: {
       profilePicUrl: string | null;
       creatorProfile: {
         displayName: string;
         sector: string | null;
+        bio?: string | null;
       } | null;
     };
   };
@@ -78,5 +87,70 @@ export const listIROsFn = async (
     throw new Error(json.message || "Failed to fetch IROs");
   }
 
+  return json.data;
+};
+
+/**
+ * Get IRO by ID
+ */
+export const getIROByIdFn = async (id: string): Promise<IRO> => {
+  const response = await fetch(`${API_URL}/v1/iro/${id}`, {
+    method: "GET",
+    headers: { ...defaultHeaders },
+  });
+
+  const json: BackendResponse<IRO> = await response.json();
+  if (!json.ok) throw new Error(json.message || "Failed to fetch IRO");
+  return json.data;
+};
+
+/**
+ * Create Buy Intent
+ */
+export const createBuyIntentFn = async (
+  token: string,
+  iroId: string,
+  amount: number,
+): Promise<{
+  iroId: string;
+  depositAddress: string;
+  estimatedTokens: string;
+  amountSol: number;
+}> => {
+  const response = await fetch(`${API_URL}/v1/iro/${iroId}/buy`, {
+    method: "POST",
+    headers: {
+      ...defaultHeaders,
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ amount }),
+  });
+
+  const json = await response.json();
+  if (!json.ok) throw new Error(json.message || "Failed to initiate purchase");
+  return json.data;
+};
+
+/**
+ * Confirm Buy
+ */
+export const confirmBuyFn = async (
+  token: string,
+  iroId: string,
+  signature: string,
+  amount: number,
+  userWalletAddress: string,
+): Promise<{ status: string; tokens: number }> => {
+  const response = await fetch(`${API_URL}/v1/iro/${iroId}/confirm`, {
+    method: "POST",
+    headers: {
+      ...defaultHeaders,
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ signature, amount, userWalletAddress }),
+  });
+
+  const json = await response.json();
+  if (!json.ok) throw new Error(json.message || "Failed to confirm purchase");
   return json.data;
 };
