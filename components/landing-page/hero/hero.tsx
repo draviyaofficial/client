@@ -43,7 +43,7 @@ const Hero = () => {
         />
 
         {/* Mask/Overlay */}
-        <div className="hero-overlay" aria-hidden="true" />
+        {/* <div className="hero-overlay" aria-hidden="true" /> */}
 
         {/* Floating platform logos */}
         <HeroLogos />

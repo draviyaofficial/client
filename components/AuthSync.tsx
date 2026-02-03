@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { useMutation } from "@tanstack/react-query";
 import { syncUserFn } from "@/services/auth/model/api/mutations";
+import { OnboardingDialog } from "@/components/onboarding/OnboardingDialog";
 
 export default function AuthSync() {
   const { user, ready, authenticated, getAccessToken } = usePrivy();
   const hasSynced = useRef(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const { mutate: syncUser } = useMutation({
     mutationFn: async () => {
@@ -26,11 +28,14 @@ export default function AuthSync() {
           email,
           walletAddress,
         },
-        token
+        token,
       );
     },
     onSuccess: (data) => {
       console.log("User synced:", data);
+      if (data.isNew) {
+        setShowOnboarding(true);
+      }
     },
     onError: (error) => {
       console.error("Sync error:", error);
@@ -48,5 +53,7 @@ export default function AuthSync() {
     }
   }, [ready, authenticated, user, syncUser]);
 
-  return null;
+  return (
+    <OnboardingDialog open={showOnboarding} onOpenChange={setShowOnboarding} />
+  );
 }

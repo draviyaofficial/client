@@ -120,7 +120,7 @@ export const fetchMeFn = async (token: string): Promise<User | null> => {
 export const syncUserFn = async (
   userData: { privyId: string; email?: string; walletAddress?: string },
   token: string,
-): Promise<User> => {
+): Promise<{ user: User; isNew: boolean }> => {
   const response = await fetch(`${API_URL}/v1/user`, {
     method: "POST",
     headers: {
@@ -136,7 +136,7 @@ export const syncUserFn = async (
     throw new Error(json.message || "Sync failed");
   }
 
-  return json.data;
+  return { user: json.data, isNew: response.status === 201 };
 };
 
 // --- UPDATE USER ---
