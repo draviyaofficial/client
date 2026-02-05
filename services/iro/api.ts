@@ -154,3 +154,29 @@ export const confirmBuyFn = async (
   if (!json.ok) throw new Error(json.message || "Failed to confirm purchase");
   return json.data;
 };
+
+export interface IROParticipant {
+  userId: string;
+  totalAmountSOL: number;
+  totalTokenQuantity: number;
+  user: {
+    firstName: string | null;
+    lastName: string | null;
+    displayName: string | null;
+    profilePicUrl: string | null;
+    walletAddress: string | null;
+  } | null;
+}
+
+export const getIROParticipantsFn = async (
+  iroId: string,
+): Promise<IROParticipant[]> => {
+  const response = await fetch(`${API_URL}/v1/iro/${iroId}/participants`, {
+    method: "GET",
+    headers: { ...defaultHeaders },
+  });
+
+  const json: BackendResponse<IROParticipant[]> = await response.json();
+  if (!json.ok) throw new Error(json.message || "Failed to fetch participants");
+  return json.data;
+};

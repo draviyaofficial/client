@@ -2,7 +2,16 @@
 
 import React, { useState } from "react";
 import { useUser } from "@/services/auth/model/hooks/useUser";
-import { Shield, Bell, User, Save, AlertTriangle, X } from "lucide-react";
+import {
+  Shield,
+  Bell,
+  User,
+  Save,
+  AlertTriangle,
+  X,
+  Settings,
+  Check,
+} from "lucide-react";
 
 import { usePrivy } from "@privy-io/react-auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -18,6 +27,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { countries } from "@/lib/constants/countries";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 export default function SettingsPage() {
   const { data: user, isLoading: isUserLoading } = useUser();
@@ -49,13 +62,7 @@ export default function SettingsPage() {
       setCountry(dbUser.country || "");
       setEmail(dbUser.email || "");
       setProfilePicUrl(dbUser.profilePicUrl || "");
-    }
-    // If dbUser is not yet loaded or empty, we could fallback to `user` (Privy user)
-    // but typically `dbUser` is the source of truth for these profile fields.
-    // We can initialize email from `user` if `dbUser` is missing.
-    else if (user) {
-      // Try to parse name if available and not set
-      // But user requested "initially there would be no name" if not set in DB
+    } else if (user) {
       setEmail(user.email || "");
     }
   }, [dbUser, user]);
@@ -92,287 +99,294 @@ export default function SettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-xl p-10 space-y-12">
-        {/* Header Skeleton */}
-        <div className="space-y-2">
-          <Skeleton className="h-12 w-48" />
-          <Skeleton className="h-6 w-96" />
-        </div>
-
-        {/* Profile Skeleton */}
-        <div className="space-y-6">
-          <Skeleton className="h-8 w-48" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-20" />
-              <Skeleton className="h-12 w-full" />
-            </div>
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-20" />
-              <Skeleton className="h-12 w-full" />
-            </div>
-            <div className="md:col-span-2 space-y-2">
-              <Skeleton className="h-4 w-20" />
-              <Skeleton className="h-12 w-full" />
-            </div>
-            <div className="md:col-span-2 space-y-2">
-              <Skeleton className="h-4 w-20" />
-              <Skeleton className="h-12 w-full" />
-            </div>
-          </div>
-          <div className="flex justify-end">
-            <Skeleton className="h-10 w-32" />
-          </div>
-        </div>
+      <div className="bg-zinc-50/50 rounded-xl p-10 min-h-[calc(100vh-2.5rem)] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#F2723B]" />
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl p-10 space-y-12">
+    <div className="space-y-8 bg-white rounded-xl min-h-[calc(100vh-2.5rem)] p-10">
       {/* Header */}
       <div>
-        <h1 className="text-5xl font-semibold tracking-tight text-zinc-900">
-          Settings
-        </h1>
-        <p className="text-zinc-400 mt-1 text-lg">
-          Manage your account preferences and security settings.
-        </p>
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 rounded-lg bg-zinc-100 text-[#F2723B]">
+              <Settings className="w-6 h-6" />
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight text-zinc-900">
+              Settings
+            </h1>
+          </div>
+          <p className="text-zinc-500 mt-1 max-w-xl">
+            Manage your personal information, security preferences, and account
+            settings.
+          </p>
+        </div>
       </div>
 
-      {/* Profile Settings */}
-      <section className="space-y-6">
-        <div className="flex items-center gap-2 border-b border-zinc-100 pb-4">
-          <User className="h-6 w-6 text-zinc-400" />
-          <h2 className="text-2xl font-medium text-zinc-900">
-            Profile Information
-          </h2>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-6 pt-0">
+        {/* Navigation Sidebar (could be added later, for now just vertical stack) */}
 
-        <div className="flex items-center gap-6 py-4">
-          <div className="w-24 h-24 rounded-full overflow-hidden border border-zinc-200 bg-zinc-50 shrink-0">
-            {profilePicUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={profilePicUrl}
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-zinc-100 text-zinc-400">
-                <User className="w-8 h-8" />
+        {/* Main Form Area */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* Profile Settings */}
+          <div className="bg-white rounded-xl border border-zinc-200 shadow-xs overflow-hidden">
+            <div className="p-6 border-b border-zinc-100 bg-zinc-50/30">
+              <div className="flex items-center gap-2">
+                <User className="h-5 w-5 text-[#F2723B]" />
+                <h2 className="text-lg font-semibold text-zinc-900">
+                  Profile Information
+                </h2>
               </div>
-            )}
-          </div>
-          <div className="flex-1 max-w-sm">
-            <ImageUpload
-              value={profilePicUrl}
-              onChange={setProfilePicUrl}
-              disabled={isPending}
-            />
-            <p className="text-xs text-zinc-500 mt-2">
-              Recommended: Square image, max 5MB.
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-zinc-700 mb-2">
-              First Name
-            </label>
-            <input
-              type="text"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              placeholder="Enter your first name"
-              className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-zinc-700 mb-2">
-              Last Name
-            </label>
-            <input
-              type="text"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              placeholder="Enter your last name"
-              className="w-full px-4 py-3 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
-            />
-          </div>
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-zinc-700 mb-2">
-              Email Address
-            </label>
-            <input
-              type="email"
-              value={email}
-              disabled
-              className="w-full px-4 py-3 border border-zinc-200 rounded-lg bg-zinc-50 text-zinc-500 cursor-not-allowed"
-            />
-          </div>
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-zinc-700 mb-2">
-              Country
-            </label>
-            <Select value={country} onValueChange={setCountry}>
-              <SelectTrigger className="w-full px-4 py-3 h-auto border border-zinc-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
-                <SelectValue placeholder="Select your country" />
-              </SelectTrigger>
-              <SelectContent>
-                {countries.map((c) => (
-                  <SelectItem key={c.value} value={c.value}>
-                    {c.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div className="flex justify-end pt-4">
-          <button
-            onClick={() => updateProfile()}
-            disabled={isPending}
-            className="flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-3 text-sm font-medium text-white hover:bg-indigo-700 transition-colors disabled:opacity-50"
-          >
-            <Save className="h-4 w-4" />
-            {isPending ? "Saving..." : "Save Changes"}
-          </button>
-        </div>
-      </section>
-
-      {/* KYC Status */}
-      <section className="space-y-6">
-        <div className="flex items-center gap-2 border-b border-zinc-100 pb-4">
-          <Shield className="h-6 w-6 text-zinc-400" />
-          <h2 className="text-2xl font-medium text-zinc-900">
-            Verification & KYC
-          </h2>
-        </div>
-
-        <div className="rounded-xl border border-zinc-200 p-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div>
-              <p className="text-lg font-medium text-zinc-900">
-                Identity Verification
-              </p>
-              <p className="text-zinc-500 mt-1 max-w-xl">
-                Complete KYC to unlock higher investment limits and additional
-                features.
+              <p className="text-sm text-zinc-500 mt-1">
+                Update your public profile details.
               </p>
             </div>
-            <div className="flex items-center gap-4">
-              <div
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
-                  kycStatus === "verified"
-                    ? "text-green-700 bg-green-50"
-                    : kycStatus === "pending"
-                      ? "text-yellow-700 bg-yellow-50"
-                      : "text-red-700 bg-red-50"
-                }`}
-              >
-                {kycStatus === "verified" ? (
-                  <Shield className="h-4 w-4" />
-                ) : kycStatus === "pending" ? (
-                  <AlertTriangle className="h-4 w-4" />
-                ) : (
-                  <X className="h-4 w-4" />
+
+            <div className="p-6 space-y-6">
+              <div className="flex flex-col sm:flex-row items-center gap-6">
+                <div className="shrink-0">
+                  <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-zinc-100 shadow-md">
+                    {profilePicUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={profilePicUrl}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-zinc-100 text-zinc-400">
+                        <User className="w-8 h-8" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex-1 w-full space-y-2">
+                  <Label>Profile Picture</Label>
+                  <ImageUpload
+                    value={profilePicUrl}
+                    onChange={setProfilePicUrl}
+                    disabled={isPending}
+                  />
+                  <p className="text-xs text-zinc-500">
+                    Recommended: Square JPG, PNG. Max 5MB.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label>First Name</Label>
+                  <Input
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="Enter your first name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Last Name</Label>
+                  <Input
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Enter your last name"
+                  />
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                  <Label>Email Address</Label>
+                  <Input
+                    type="email"
+                    value={email}
+                    disabled
+                    className="bg-zinc-50 text-zinc-500"
+                  />
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                  <Label>Country</Label>
+                  <Select value={country} onValueChange={setCountry}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your country" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {countries.map((c) => (
+                        <SelectItem key={c.value} value={c.value}>
+                          {c.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-4 border-t border-zinc-50">
+                <Button
+                  onClick={() => updateProfile()}
+                  disabled={isPending}
+                  className="bg-[#1a1c2e] hover:bg-[#2d3250] text-white"
+                >
+                  {isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Save Changes
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* KYC Status */}
+          <div className="bg-white rounded-xl border border-zinc-200 shadow-xs overflow-hidden">
+            <div className="p-6 border-b border-zinc-100 bg-zinc-50/30">
+              <div className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-indigo-500" />
+                <h2 className="text-lg font-semibold text-zinc-900">
+                  Verification & KYC
+                </h2>
+              </div>
+              <p className="text-sm text-zinc-500 mt-1">
+                Complete verification to unlock higher limits.
+              </p>
+            </div>
+
+            <div className="p-6">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-4 rounded-xl border border-zinc-100 bg-zinc-50/50">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="font-medium text-zinc-900">Identity Status</p>
+                    <div
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        kycStatus === "verified"
+                          ? "text-green-700 bg-green-100"
+                          : kycStatus === "pending"
+                            ? "text-yellow-700 bg-yellow-100"
+                            : "text-red-700 bg-red-100"
+                      }`}
+                    >
+                      {kycStatus === "verified" ? (
+                        <Check className="h-3 w-3" />
+                      ) : kycStatus === "pending" ? (
+                        <AlertTriangle className="h-3 w-3" />
+                      ) : (
+                        <X className="h-3 w-3" />
+                      )}
+                      <span className="capitalize">{kycStatus}</span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-zinc-500 max-w-md">
+                    Based on your current level, you have a daily withdrawal
+                    limit of 10 SOL.
+                  </p>
+                </div>
+
+                {kycStatus !== "verified" && (
+                  <Button
+                    variant="outline"
+                    className="border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+                  >
+                    {kycStatus === "pending"
+                      ? "Complete KYC"
+                      : "Start Verification"}
+                  </Button>
                 )}
-                <span className="capitalize">{kycStatus}</span>
               </div>
-              {kycStatus !== "verified" && (
-                <button className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors">
-                  {kycStatus === "pending"
-                    ? "Complete KYC"
-                    : "Start Verification"}
-                </button>
-              )}
             </div>
           </div>
         </div>
-      </section>
 
-      {/* Notification Preferences */}
-      <section className="space-y-6">
-        <div className="flex items-center gap-2 border-b border-zinc-100 pb-4">
-          <Bell className="h-6 w-6 text-zinc-400" />
-          <h2 className="text-2xl font-medium text-zinc-900">
-            Notification Preferences
-          </h2>
-        </div>
-
-        <div className="space-y-6">
-          {[
-            {
-              key: "email",
-              label: "Email Notifications",
-              description:
-                "Receive updates about your investments and platform news",
-            },
-            {
-              key: "push",
-              label: "Push Notifications",
-              description: "Get instant notifications on your device",
-            },
-            {
-              key: "sms",
-              label: "SMS Notifications",
-              description: "Receive important alerts via text message",
-            },
-            {
-              key: "marketing",
-              label: "Marketing Communications",
-              description:
-                "Receive promotional offers and new feature announcements",
-            },
-          ].map(({ key, label, description }) => (
-            <div key={key} className="flex items-center justify-between py-2">
-              <div>
-                <p className="font-medium text-zinc-900">{label}</p>
-                <p className="text-sm text-zinc-500">{description}</p>
+        {/* Sidebar Settings */}
+        <div className="space-y-8">
+          {/* Notification Preferences */}
+          <div className="bg-white rounded-xl border border-zinc-200 shadow-xs overflow-hidden">
+            <div className="p-6 border-b border-zinc-100 bg-zinc-50/30">
+              <div className="flex items-center gap-2">
+                <Bell className="h-5 w-5 text-zinc-500" />
+                <h2 className="text-lg font-semibold text-zinc-900">
+                  Notifications
+                </h2>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={notifications[key as keyof typeof notifications]}
-                  onChange={(e) =>
-                    setNotifications((prev) => ({
-                      ...prev,
-                      [key]: e.target.checked,
-                    }))
-                  }
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-              </label>
             </div>
-          ))}
-        </div>
-      </section>
+            <div className="p-6 space-y-6">
+              {[
+                {
+                  key: "email",
+                  label: "Email Updates",
+                  description: "Project updates & news",
+                },
+                {
+                  key: "push",
+                  label: "Push Notifications",
+                  description: "Instant alerts on device",
+                },
+                {
+                  key: "marketing",
+                  label: "Marketing",
+                  description: "Promotions & offers",
+                },
+              ].map(({ key, label, description }) => (
+                <div key={key} className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-sm text-zinc-900">{label}</p>
+                  </div>
+                  <Switch
+                    checked={!!notifications[key as keyof typeof notifications]}
+                    onCheckedChange={(checked: boolean) =>
+                      setNotifications((prev) => ({ ...prev, [key]: checked }))
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
 
-      {/* Danger Zone */}
-      <div className="rounded-xl border border-red-200 bg-red-50 shadow-sm overflow-hidden">
-        <div className="border-b border-red-100 bg-red-50 px-6 py-4">
-          <h2 className="font-semibold text-red-900">Danger Zone</h2>
-        </div>
-
-        <div className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-red-900">Disconnect Wallet</p>
-              <p className="text-sm text-red-700 mt-1">
-                This will disconnect your wallet from the platform. You can
-                reconnect at any time.
+          {/* Danger Zone */}
+          <div className="bg-red-50 rounded-xl border border-red-100 overflow-hidden">
+            <div className="p-6 border-b border-red-100 bg-red-100/50">
+              <h2 className="text-red-900 font-semibold flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4" /> Danger Zone
+              </h2>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-xs text-red-700">
+                Disconnecting your wallet will remove access to your dashboard
+                until you reconnect.
               </p>
+              <Button
+                variant="destructive"
+                className="w-full bg-red-600 hover:bg-red-700"
+              >
+                Disconnect Wallet
+              </Button>
             </div>
-            <button className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors">
-              Disconnect
-            </button>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+function Loader2(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+    </svg>
   );
 }

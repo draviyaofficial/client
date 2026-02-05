@@ -2,15 +2,14 @@
 
 import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getIROByIdFn,
   createBuyIntentFn,
   confirmBuyFn,
-  IRO,
+  getIROParticipantsFn,
 } from "@/services/iro/api";
-// Separate specific Solana hooks to avoid context conflicts
-import { usePrivy, ConnectedWallet } from "@privy-io/react-auth";
+import { usePrivy } from "@privy-io/react-auth";
 import {
   useWallets,
   useSignAndSendTransaction,
@@ -19,15 +18,20 @@ import { useUser } from "@/services/auth/model/hooks/useUser";
 import { toast } from "sonner";
 import bs58 from "bs58";
 import {
-  Clock,
   ExternalLink,
-  Target,
-  Users,
-  ShieldCheck,
-  AlertCircle,
-  CheckCircle,
   Loader2,
   Wallet,
+  Globe,
+  Twitter,
+  Send as Telegram,
+  MessageCircle,
+  Clock,
+  Users,
+  Trophy,
+  Copy,
+  Check,
+  User as UserIcon,
+  ArrowLeft,
 } from "lucide-react";
 import {
   pipe,
@@ -41,27 +45,21 @@ import {
   createNoopSigner,
 } from "@solana/kit";
 import { getTransferSolInstruction } from "@solana-program/system";
-import {
-  SystemProgram,
-  Transaction,
-  PublicKey,
-  LAMPORTS_PER_SOL,
-} from "@solana/web3.js";
+import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { connection } from "@/services/solana/connection";
 
-// Components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function IROPage() {
   const { id } = useParams<{ id: string }>();
@@ -74,6 +72,7 @@ export default function IROPage() {
 
   const [amount, setAmount] = useState<string>("");
   const [isBuying, setIsBuying] = useState(false);
+  const [addressCopied, setAddressCopied] = useState(false);
 
   // Fetch IRO Details
   const {
@@ -87,7 +86,14 @@ export default function IROPage() {
     staleTime: 1000 * 30, // 30 seconds
   });
 
-  // Purchase Mutation
+  // Fetch Top Buyers
+  const { data: participants, isLoading: isLoadingParticipants } = useQuery({
+    queryKey: ["iro-participants", id],
+    queryFn: () => getIROParticipantsFn(id),
+    enabled: !!id,
+    staleTime: 1000 * 60, // 1 minute
+  });
+
   const handlePurchase = async () => {
     if (!iro || !amount) return;
 
@@ -96,14 +102,12 @@ export default function IROPage() {
       return;
     }
 
-    // Identify the correct wallet (prioritize embedded Privy wallet)
     const embeddedWallet = wallets.find(
       (w: any) => w.walletClientType === "privy",
     );
     const selectedWallet = embeddedWallet || wallets[0];
 
     if (!selectedWallet) {
-      // Trigger connection flow specific to embedded wallet or general
       connectWallet();
       return;
     }
@@ -125,31 +129,18 @@ export default function IROPage() {
 
       const userWalletAddress = selectedWallet.address;
 
-      if (dbUser && userWalletAddress !== dbUser.walletAddress) {
-        console.warn(
-          "Wallet mismatch",
-          userWalletAddress,
-          dbUser.walletAddress,
-        );
-      }
-
       // Check Balance
       const balance = await connection.getBalance(
         new PublicKey(userWalletAddress),
       );
       const requiredAmount = amountNum * LAMPORTS_PER_SOL;
       if (balance < requiredAmount + 5000) {
-        // 5000 lamports for gas
         const isDevnet = process.env.NODE_ENV !== "production";
         toast.error("Insufficient Funds", {
           description: isDevnet
             ? `Please airdrop SOL to ${userWalletAddress.slice(0, 4)}...${userWalletAddress.slice(-4)}`
             : "Please top up your wallet",
         });
-        console.log(
-          "Req Airdrop:",
-          `https://faucet.solana.com/?address=${userWalletAddress}`,
-        );
         return;
       }
 
@@ -160,18 +151,15 @@ export default function IROPage() {
 
       // 2. Build Transaction (Client)
       toast.loading("Preparing transaction...");
-      // Get latest blockhash
       const { blockhash, lastValidBlockHeight } =
         await connection.getLatestBlockhash();
 
-      // Create Transfer Instruction
       const transferInstruction = getTransferSolInstruction({
         amount: BigInt(Math.round(intent.amountSol * LAMPORTS_PER_SOL)),
         destination: address(intent.depositAddress),
         source: createNoopSigner(address(selectedWallet.address)),
       });
 
-      // Create Transaction Message
       const transactionMessage = pipe(
         createTransactionMessage({ version: 0 }),
         (tx) =>
@@ -188,23 +176,12 @@ export default function IROPage() {
         (tx) => compileTransaction(tx),
       );
 
-      // Serialize Transaction
       const serializedTransaction = new Uint8Array(
         getTransactionEncoder().encode(transactionMessage),
       );
 
-      // 3. Sign and Send using Privy (activates popup/embedded flow)
       toast.dismiss();
       toast.loading("Please confirm in your wallet...");
-
-      console.log(
-        "Sending transaction with wallet:",
-        selectedWallet.address,
-        "Chain:",
-        process.env.NODE_ENV === "production"
-          ? "solana:mainnet"
-          : "solana:devnet",
-      );
 
       const output = await signAndSendTransaction({
         transaction: serializedTransaction,
@@ -218,15 +195,11 @@ export default function IROPage() {
         },
       });
 
-      // Convert Uint8Array signature to base58 string
       const signature = bs58.encode(output.signature);
 
       toast.dismiss();
       toast.loading("Transaction sent! Verifying...");
 
-      // 4. Confirm Buy (Server)
-      // We wait for the server/blockchain to index, or send signature immediately.
-      // ConfirmBuyFn usually verifies the signature on-chain anyway.
       await confirmBuyFn(
         accessToken,
         iro.id,
@@ -242,6 +215,7 @@ export default function IROPage() {
 
       setAmount("");
       queryClient.invalidateQueries({ queryKey: ["iro", id] });
+      queryClient.invalidateQueries({ queryKey: ["iro-participants", id] });
       queryClient.invalidateQueries({ queryKey: ["wallet-balance"] });
     } catch (err: any) {
       console.error("Purchase Error:", err);
@@ -252,9 +226,16 @@ export default function IROPage() {
     }
   };
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setAddressCopied(true);
+    toast.success("Address copied to clipboard");
+    setTimeout(() => setAddressCopied(false), 2000);
+  };
+
   if (isLoading) {
     return (
-      <div className="flex h-[80vh] items-center justify-center">
+      <div className="flex bg-zinc-50 h-[calc(100vh-2.5rem)] items-center justify-center rounded-xl">
         <Loader2 className="h-8 w-8 animate-spin text-[#F2723B]" />
       </div>
     );
@@ -263,7 +244,6 @@ export default function IROPage() {
   if (error || !iro) {
     return (
       <div className="flex h-[80vh] items-center justify-center flex-col gap-4">
-        <AlertCircle className="h-12 w-12 text-red-500" />
         <p className="text-zinc-600">Failed to load IRO details</p>
         <Button variant="outline" onClick={() => router.back()}>
           Go Back
@@ -277,93 +257,155 @@ export default function IROPage() {
       ? (parseFloat(iro.totalRaised) / parseFloat(iro.hardCap)) * 100
       : 0;
 
-  // Mock Roadmap Data
-  const roadmap = [
-    {
-      phase: "Phase 1",
-      title: "Launch & Fundraising",
-      date: "Q1 2024",
-      status: "completed",
-    },
-    {
-      phase: "Phase 2",
-      title: "Platform Development",
-      date: "Q2 2024",
-      status: "current",
-    },
-    {
-      phase: "Phase 3",
-      title: "Beta Testing",
-      date: "Q3 2024",
-      status: "upcoming",
-    },
-    {
-      phase: "Phase 4",
-      title: "Public Release",
-      date: "Q4 2024",
-      status: "upcoming",
-    },
-  ];
-
-  // Mock FAQ Data
-  const faqs = [
-    {
-      q: "What is the minimum investment?",
-      a: `The minimum purchase amount is ${iro.minPurchase || 0.1} SOL.`,
-    },
-    {
-      q: "When will I receive my tokens?",
-      a: "Tokens are distributed immediately upon purchase to your connected wallet.",
-    },
-    {
-      q: "Is there a lock-up period?",
-      a: "Yes, liquidity is locked for 12 months to ensure project stability.",
-    },
-  ];
+  const timeLeft = Math.max(
+    0,
+    Math.ceil(
+      (new Date(iro.endTime).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+    ),
+  );
 
   return (
-    <div className="space-y-8 bg-white rounded-xl p-10 min-h-[calc(100vh-2.5rem)]">
-      {/* Header / Hero */}
-      <div className="flex flex-col md:flex-row gap-8 items-start justify-between">
-        <div className="flex items-center gap-6">
-          {iro.token.logoUrl ? (
-            <img
-              src={iro.token.logoUrl}
-              alt={iro.token.name}
-              className="w-24 h-24 rounded-full shadow-lg border-4 border-white object-cover"
-            />
-          ) : (
-            <div className="w-24 h-24 rounded-full bg-zinc-200 flex items-center justify-center text-zinc-400 font-bold text-xl shadow-lg border-4 border-white">
-              {iro.token.symbol.slice(0, 2)}
+    <div className="space-y-8 bg-white rounded-xl min-h-[calc(100vh-2.5rem)] p-10">
+      {/* Header with Back Button */}
+      <div className="flex items-center">
+        <Button
+          variant="ghost"
+          className="gap-2 text-zinc-600 hover:text-zinc-900 -ml-2"
+          onClick={() => router.back()}
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </Button>
+      </div>
+
+      {/* Hero Section */}
+      <div className="rounded-2xl bg-linear-to-br from-[#1a1c2e] to-[#2d3250] text-white overflow-hidden shadow-xl relative">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#F2723B]/10 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none" />
+
+        <div className="p-8 md:p-12 relative z-10">
+          <div className="flex flex-col md:flex-row gap-8 items-start">
+            {/* Logo */}
+            <div className="shrink-0">
+              {iro.token.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={iro.token.logoUrl}
+                  alt={iro.token.name}
+                  className="w-32 h-32 rounded-2xl shadow-2xl border-4 border-white/10 object-cover"
+                />
+              ) : (
+                <div className="w-32 h-32 rounded-2xl bg-white/10 flex items-center justify-center text-white/40 font-bold text-3xl border-4 border-white/10 backdrop-blur-md">
+                  {iro.token.symbol.slice(0, 2)}
+                </div>
+              )}
             </div>
-          )}
-          <div className="space-y-2">
-            <h1 className="text-4xl font-bold text-zinc-900">
-              {iro.token.name}
-            </h1>
-            <div className="flex items-center gap-3">
-              <span className="px-3 py-1 rounded-full bg-[#f9efe3] text-[#F2723B] font-medium text-sm">
-                ${iro.token.symbol}
-              </span>
-              <span className="text-zinc-500">
-                by {iro.token.user.creatorProfile?.displayName || "Creator"}
-              </span>
+
+            {/* Info */}
+            <div className="flex-1 space-y-4">
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-center gap-3">
+                  <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+                    {iro.token.name}
+                  </h1>
+                  <span className="px-3 py-1 rounded-full bg-[#F2723B] text-white font-semibold text-sm shadow-lg shadow-[#F2723B]/20">
+                    ${iro.token.symbol}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-indigo-200">
+                  <span>
+                    by {iro.token.user.creatorProfile?.displayName || "Creator"}
+                  </span>
+                  {iro.token.user.creatorProfile?.sector && (
+                    <>
+                      <span>•</span>
+                      <span className="capitalize">
+                        {iro.token.user.creatorProfile.sector.toLowerCase()}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-3 pt-2">
+                {iro.token.websiteUrl && (
+                  <a
+                    href={iro.token.websiteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-sm text-white/80 hover:text-white"
+                  >
+                    <Globe className="w-5 h-5" />
+                  </a>
+                )}
+                {iro.token.twitterUrl && (
+                  <a
+                    href={iro.token.twitterUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-sm text-white/80 hover:text-white"
+                  >
+                    <Twitter className="w-5 h-5" />
+                  </a>
+                )}
+                {iro.token.telegramUrl && (
+                  <a
+                    href={iro.token.telegramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-sm text-white/80 hover:text-white"
+                  >
+                    <Telegram className="w-5 h-5" />
+                  </a>
+                )}
+                {iro.token.discordUrl && (
+                  <a
+                    href={iro.token.discordUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-sm text-white/80 hover:text-white"
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* Status Badge */}
+            <div className="flex flex-col items-end gap-2">
+              <div className="px-4 py-2 bg-green-500/20 text-green-300 rounded-lg font-medium border border-green-500/30 flex items-center gap-2 backdrop-blur-md">
+                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                LIVE SALE
+              </div>
+              <div className="text-sm text-indigo-200 flex items-center gap-1">
+                <Clock className="w-4 h-4" />
+                Ends in {timeLeft} days
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex gap-3">
-          {iro.token.websiteUrl && (
-            <Button variant="outline" asChild>
-              <a href={iro.token.websiteUrl} target="_blank" rel="noreferrer">
-                <ExternalLink className="mr-2 h-4 w-4" /> Website
-              </a>
-            </Button>
-          )}
-          <div className="flex gap-2">
-            <div className="px-4 py-2 bg-green-50 text-green-700 rounded-lg font-medium border border-green-100 flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              LIVE
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-white/10">
+            <div>
+              <p className="text-indigo-300 text-sm mb-1">Total Raised</p>
+              <p className="text-2xl font-bold">
+                {parseFloat(iro.totalRaised).toLocaleString()} SOL
+              </p>
+            </div>
+            <div>
+              <p className="text-indigo-300 text-sm mb-1">Hard Cap</p>
+              <p className="text-2xl font-bold">
+                {parseFloat(iro.hardCap).toLocaleString()} SOL
+              </p>
+            </div>
+            <div>
+              <p className="text-indigo-300 text-sm mb-1">Price</p>
+              <p className="text-2xl font-bold">{iro.tokenPrice} SOL</p>
+            </div>
+            <div>
+              <p className="text-indigo-300 text-sm mb-1">Participants</p>
+              <p className="text-2xl font-bold">
+                {participants?.length || "--"}
+              </p>
             </div>
           </div>
         </div>
@@ -372,214 +414,239 @@ export default function IROPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-8">
-          {/* Progress Card */}
-          <Card className="border-zinc-200 shadow-sm">
-            <CardHeader>
-              <CardTitle>Fundraising Progress</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-zinc-600">Total Raised</span>
-                  <span className="font-medium text-zinc-900">
-                    {parseFloat(iro.totalRaised).toLocaleString()} /{" "}
-                    {parseFloat(iro.hardCap).toLocaleString()} SOL
-                  </span>
-                </div>
-                <Progress value={progress} className="h-3" />
-                <p className="text-xs text-zinc-500 text-right">
-                  {progress.toFixed(2)}% of Hard Cap
+          {/* Progress Section */}
+          <div className="bg-white rounded-xl p-6 border border-zinc-200 shadow-xs">
+            <div className="flex justify-between items-end mb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-zinc-900">
+                  Fundraising Goal
+                </h3>
+                <p className="text-zinc-500 text-sm">
+                  {progress.toFixed(2)}% of {parseFloat(iro.hardCap)} SOL Goal
+                  Reached
                 </p>
               </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4 border-t border-zinc-100">
-                <div>
-                  <p className="text-sm text-zinc-500 mb-1">Price per Token</p>
-                  <p className="font-semibold text-lg">{iro.tokenPrice} SOL</p>
-                </div>
-                <div>
-                  <p className="text-sm text-zinc-500 mb-1">Tokens Sold</p>
-                  <p className="font-semibold text-lg">
-                    {parseFloat(iro.tokensSold).toLocaleString()}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-zinc-500 mb-1">Participants</p>
-                  <p className="font-semibold text-lg">--</p>
-                </div>
+              <div className="text-right">
+                <span className="text-2xl font-bold text-[#F2723B]">
+                  {progress.toFixed(1)}%
+                </span>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            <Progress value={progress} className="h-4 bg-zinc-100" />
+            <div className="mt-4 flex justify-between text-sm text-zinc-500">
+              <span>0 SOL</span>
+              <span>
+                {parseFloat(iro.softCap).toLocaleString()} SOL (Soft Cap)
+              </span>
+              <span>{parseFloat(iro.hardCap).toLocaleString()} SOL</span>
+            </div>
+          </div>
 
           {/* About Project */}
-          <Card className="border-zinc-200 shadow-sm">
-            <CardHeader>
-              <CardTitle>About Project</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-zinc-600 leading-relaxed whitespace-pre-wrap">
-                {iro.token.description || "No description provided."}
-              </p>
-              <div className="mt-6 flex flex-wrap gap-4">
-                <div className="flex items-center gap-2 text-sm text-zinc-600">
-                  <ShieldCheck className="h-4 w-4 text-green-500" />
-                  <span>Audited Contract</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-zinc-600">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span>KYC Verified Creator</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="bg-white rounded-xl p-6 border border-zinc-200 shadow-xs">
+            <h3 className="text-xl font-semibold text-zinc-900 mb-4">
+              About Project
+            </h3>
+            <p className="text-zinc-600 leading-relaxed whitespace-pre-wrap">
+              {iro.token.description || "No description provided."}
+            </p>
+          </div>
 
-          {/* Roadmap */}
-          <Card className="border-zinc-200 shadow-sm">
-            <CardHeader>
-              <CardTitle>Roadmap</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {roadmap.map((item, index) => (
-                  <div key={index} className="flex gap-4">
-                    <div className="flex flex-col items-center">
-                      <div
-                        className={`w-3 h-3 rounded-full mt-1.5 ${item.status === "completed" ? "bg-green-500" : item.status === "current" ? "bg-[#F2723B]" : "bg-zinc-300"}`}
-                      />
-                      {index !== roadmap.length - 1 && (
-                        <div className="w-0.5 flex-1 bg-zinc-100 my-1" />
+          {/* Token Details */}
+          <div className="bg-white rounded-xl p-6 border border-zinc-200 shadow-xs">
+            <h3 className="text-xl font-semibold text-zinc-900 mb-6">
+              Token Information
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-1">
+                <p className="text-sm text-zinc-500">Token Name</p>
+                <p className="font-medium text-zinc-900">{iro.token.name}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-zinc-500">Token Symbol</p>
+                <p className="font-medium text-zinc-900">{iro.token.symbol}</p>
+              </div>
+              <div className="space-y-1 md:col-span-2">
+                <p className="text-sm text-zinc-500">Contract Address</p>
+                <div className="flex items-center gap-2">
+                  <code className="bg-zinc-100 px-2 py-1 rounded text-sm text-zinc-600 font-mono break-all">
+                    {iro.token.mintAddress || "Minting in progress..."}
+                  </code>
+                  {iro.token.mintAddress && (
+                    <button
+                      onClick={() =>
+                        copyToClipboard(iro.token.mintAddress || "")
+                      }
+                      className="text-zinc-400 hover:text-zinc-600"
+                    >
+                      {addressCopied ? (
+                        <Check className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <Copy className="w-4 h-4" />
                       )}
-                    </div>
-                    <div>
-                      <p className="font-medium text-zinc-900">{item.title}</p>
-                      <p className="text-sm text-zinc-500">
-                        {item.phase} • {item.date}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* FAQ */}
-          <Card className="border-zinc-200 shadow-sm">
-            <CardHeader>
-              <CardTitle>Frequently Asked Questions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {faqs.map((faq, index) => (
-                <div key={index} className="space-y-1">
-                  <h4 className="font-medium text-zinc-900">{faq.q}</h4>
-                  <p className="text-sm text-zinc-600">{faq.a}</p>
+                    </button>
+                  )}
                 </div>
-              ))}
-            </CardContent>
-          </Card>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-zinc-500">Total Supply</p>
+                <p className="font-medium text-zinc-900">
+                  10,000,000 {iro.token.symbol}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-zinc-500">Tokens for Sale</p>
+                <p className="font-medium text-zinc-900">
+                  {parseFloat(iro.tokensForSale).toLocaleString()}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Sidebar - Purchase */}
+        {/* Sidebar */}
         <div className="space-y-6">
-          <Card className="border-[#F2723B]/20 shadow-lg relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-[#F2723B] to-[#fcb65a]" />
-            <CardHeader>
-              <CardTitle>Participate in IRO</CardTitle>
-              <CardDescription>
-                Minimum purchase: {iro.minPurchase || 0.1} SOL
+          {/* Purchase Card */}
+          <Card className="border-0 shadow-lg relative overflow-hidden bg-[#1a1c2e] text-white">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[#F2723B]/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+            <CardHeader className="relative z-10">
+              <CardTitle className="flex items-center gap-2">
+                <Wallet className="w-5 h-5 text-[#F2723B]" />
+                Participate
+              </CardTitle>
+              <CardDescription className="text-zinc-400">
+                Join the IRO by purchasing tokens
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6 relative z-10">
               <div className="space-y-2">
-                <Label>Amount (SOL)</Label>
+                <Label className="text-zinc-300">Amount (SOL)</Label>
                 <div className="relative">
                   <Input
                     type="number"
                     placeholder="0.00"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    className="pr-12"
+                    className="pr-12 bg-white/5 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-[#F2723B]"
                     disabled={wallets.length === 0 && !privyUser?.wallet}
                   />
                   <div className="absolute right-3 top-2.5 text-sm font-medium text-zinc-500">
                     SOL
                   </div>
                 </div>
-                {amount && !isNaN(parseFloat(amount)) && (
-                  <p className="text-xs text-green-600 text-right">
-                    You will receive ≈{" "}
-                    {(
-                      parseFloat(amount) / parseFloat(iro.tokenPrice)
-                    ).toLocaleString()}{" "}
-                    {iro.token.symbol}
-                  </p>
-                )}
-              </div>
-
-              <div className="rounded-lg bg-zinc-50 p-3 text-sm space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-zinc-500">Your Balance</span>
-                  <span className="font-medium">
-                    {wallets[0] ? "-- SOL" : "No Wallet"}
+                <div className="flex justify-between text-xs">
+                  <span className="text-zinc-500">
+                    Min: {iro.minPurchase || 0.1} SOL
                   </span>
+                  {amount && !isNaN(parseFloat(amount)) && (
+                    <span className="text-[#F2723B]">
+                      ≈{" "}
+                      {(
+                        parseFloat(amount) / parseFloat(iro.tokenPrice)
+                      ).toLocaleString()}{" "}
+                      TOKENS
+                    </span>
+                  )}
                 </div>
               </div>
-            </CardContent>
-            <CardFooter>
+
               {privyUser ? (
                 <Button
-                  className="w-full bg-[#F2723B] hover:bg-[#e06532] text-white"
-                  size="lg"
+                  className="w-full bg-[#F2723B] hover:bg-[#e06532] text-white font-bold py-6 text-lg shadow-lg shadow-[#F2723B]/25"
                   onClick={handlePurchase}
                   disabled={isBuying || !amount}
                 >
                   {isBuying ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                       Processing...
                     </>
                   ) : (
-                    <>
-                      <Wallet className="mr-2 h-4 w-4" />
-                      Buy {iro.token.symbol}
-                    </>
+                    "Buy Tokens"
                   )}
                 </Button>
               ) : (
                 <Button
-                  className="w-full bg-zinc-900 hover:bg-zinc-800 text-white"
-                  size="lg"
+                  className="w-full bg-white text-[#1a1c2e] hover:bg-zinc-200 font-bold py-6"
                   onClick={connectWallet}
                 >
-                  <Wallet className="mr-2 h-4 w-4" />
-                  Connect Wallet to Buy
+                  Connect Wallet
                 </Button>
               )}
-            </CardFooter>
-          </Card>
-
-          <Card className="border-zinc-200 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-base">Tokenomics</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-zinc-500">Total Supply</span>
-                <span className="font-medium">
-                  10,000,000 {iro.token.symbol}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-zinc-500">IRO Allocation</span>
-                <span className="font-medium">
-                  {parseFloat(iro.tokensForSale).toLocaleString()}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-zinc-500">Liquidity Lock</span>
-                <span className="font-medium">12 Months</span>
-              </div>
             </CardContent>
           </Card>
+
+          {/* Top Buyers */}
+          <div className="bg-white rounded-xl border border-zinc-200 shadow-xs overflow-hidden">
+            <div className="p-4 border-b border-zinc-100 bg-zinc-50/50 flex items-center justify-between">
+              <h3 className="font-semibold text-zinc-900 flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-yellow-500" />
+                Top Buyers
+              </h3>
+              <Users className="w-4 h-4 text-zinc-400" />
+            </div>
+            <div className="divide-y divide-zinc-50">
+              {isLoadingParticipants ? (
+                <div className="p-8 space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <Skeleton className="w-8 h-8 rounded-full" />
+                      <div className="flex-1">
+                        <Skeleton className="h-4 w-24 mb-1" />
+                        <Skeleton className="h-3 w-12" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : participants && participants.length > 0 ? (
+                participants.map((p, i) => (
+                  <div
+                    key={p.userId}
+                    className="p-4 flex items-center gap-3 hover:bg-zinc-50 transition-colors"
+                  >
+                    <div className="flex items-center justify-center w-6 h-6 rounded-full bg-zinc-100 text-xs font-bold text-zinc-500">
+                      #{i + 1}
+                    </div>
+                    <div className="w-8 h-8 rounded-full overflow-hidden bg-zinc-200">
+                      {p.user?.profilePicUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={p.user.profilePicUrl}
+                          alt="User"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-zinc-300 text-zinc-500">
+                          <UserIcon className="w-4 h-4" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-zinc-900 truncate">
+                        {p.user?.displayName ||
+                          p.user?.firstName ||
+                          (p.user?.walletAddress
+                            ? `${p.user.walletAddress.slice(0, 4)}...${p.user.walletAddress.slice(-4)}`
+                            : "Anonymous")}
+                      </p>
+                      <p className="text-xs text-zinc-500">
+                        {p.totalTokenQuantity.toLocaleString()} Tokens
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-zinc-900">
+                        {Number(p.totalAmountSOL).toFixed(2)} SOL
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-8 text-center text-zinc-500 text-sm">
+                  No buyers yet. Be the first!
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
