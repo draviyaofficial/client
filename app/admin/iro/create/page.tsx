@@ -42,8 +42,8 @@ const createIROSchema = z
     vestingPeriod: z.coerce.number().min(0, "Vesting period must be 0 or more"),
     cliffPeriod: z.coerce.number().min(0, "Cliff period must be 0 or more"),
   })
-  .refine((data) => new Date(data.endTime) > new Date(data.startTime), {
-    message: "End time must be after start time",
+  .refine((data) => new Date(data.endTime) >= new Date(data.startTime), {
+    message: "End date must be at or after start date",
     path: ["endTime"],
   });
 
@@ -71,6 +71,8 @@ export default function CreateIROPage() {
       const token = await getAccessToken();
       if (!token) throw new Error("No token");
       // Convert dates to ISO strings
+      // Note: Date inputs return YYYY-MM-DD. new Date("YYYY-MM-DD") is UTC midnight.
+      // Server will override time components to enforce 10 AM / 6 PM IST.
       const payload = {
         ...data,
         startTime: new Date(data.startTime).toISOString(),
@@ -219,12 +221,8 @@ export default function CreateIROPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="startTime">Start Time</Label>
-                <Input
-                  id="startTime"
-                  type="datetime-local"
-                  {...register("startTime")}
-                />
+                <Label htmlFor="startTime">Start Date</Label>
+                <Input id="startTime" type="date" {...register("startTime")} />
                 {errors.startTime && (
                   <p className="text-sm text-red-500">
                     {errors.startTime.message}
@@ -233,12 +231,8 @@ export default function CreateIROPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="endTime">End Time</Label>
-                <Input
-                  id="endTime"
-                  type="datetime-local"
-                  {...register("endTime")}
-                />
+                <Label htmlFor="endTime">End Date</Label>
+                <Input id="endTime" type="date" {...register("endTime")} />
                 {errors.endTime && (
                   <p className="text-sm text-red-500">
                     {errors.endTime.message}
