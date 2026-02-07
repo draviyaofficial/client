@@ -65,7 +65,7 @@ export function CreatorCard({
         </div>
         <div className="w-full bg-zinc-100 rounded-full h-2">
           <div
-            className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
+            className="bg-[#F2723B] h-2 rounded-full transition-all duration-300"
             style={{ width: `${progress}%` }}
           />
         </div>

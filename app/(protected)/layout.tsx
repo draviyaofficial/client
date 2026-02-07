@@ -154,7 +154,7 @@ export default function ProtectedLayout({
               >
                 <div
                   className={`w-2.5 mr-5 h-10 ${
-                    pathname === "/token/launch" ? "bg-[#F2723B]" : "bg-none"
+                    pathname === "/token" ? "bg-[#F2723B]" : "bg-none"
                   } rounded-r-2xl`}
                 ></div>
                 <Rocket

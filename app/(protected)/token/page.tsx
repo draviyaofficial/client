@@ -556,30 +556,38 @@ export default function TokenLaunchPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto py-10 space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-zinc-900">Launch Your Token</h1>
-        <p className="text-zinc-500">
+    <div className="bg-white rounded-xl p-10 min-h-[calc(100vh-2.5rem)] space-y-8">
+      <div>
+        <h1 className="text-5xl font-semibold tracking-tight text-zinc-900">
+          Launch Your Token
+        </h1>
+        <p className="text-zinc-400 mt-1 text-lg">
           Submit your token details for approval. Once approved, you can mint
           and launch your IRO.
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Token Details</CardTitle>
-          <CardDescription>
+      <Card className="border-0 shadow-none p-0">
+        <CardHeader className="px-0 pt-0">
+          <CardTitle className="text-2xl">Token Details</CardTitle>
+          <CardDescription className="text-base">
             Provide the core information about your asset.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="name">Token Name</Label>
+        <CardContent className="px-0">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-8 max-w-4xl"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-3">
+                <Label htmlFor="name" className="text-base">
+                  Token Name
+                </Label>
                 <Input
                   id="name"
                   placeholder="e.g. Draviya DAO"
+                  className="h-12 text-lg"
                   {...register("name")}
                 />
                 {errors.name && (
@@ -587,8 +595,10 @@ export default function TokenLaunchPage() {
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="symbol">Ticker Symbol</Label>
+              <div className="space-y-3">
+                <Label htmlFor="symbol" className="text-base">
+                  Ticker Symbol
+                </Label>
                 <div className="relative">
                   <Input
                     id="symbol"
@@ -601,15 +611,15 @@ export default function TokenLaunchPage() {
                       form.setValue("symbol", e.target.value.toUpperCase());
                       setTickerAvailable(null); // Reset availability status on change
                     }}
-                    className="uppercase"
+                    className="uppercase h-12 text-lg"
                   />
-                  <div className="absolute right-3 top-2.5">
+                  <div className="absolute right-3 top-4">
                     {checkingTicker ? (
-                      <Loader2 className="animate-spin h-4 w-4 text-zinc-400" />
+                      <Loader2 className="animate-spin h-5 w-5 text-zinc-400" />
                     ) : tickerAvailable === true ? (
-                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <CheckCircle className="h-5 w-5 text-green-500" />
                     ) : tickerAvailable === false ? (
-                      <XCircle className="h-4 w-4 text-red-500" />
+                      <XCircle className="h-5 w-5 text-red-500" />
                     ) : null}
                   </div>
                 </div>
@@ -619,22 +629,26 @@ export default function TokenLaunchPage() {
                   </p>
                 )}
                 {tickerAvailable === true && (
-                  <p className="text-xs text-green-600">Ticker is available</p>
+                  <p className="text-xs text-green-600 font-medium mt-1">
+                    Ticker is available
+                  </p>
                 )}
                 {tickerAvailable === false && (
-                  <p className="text-xs text-red-600">
+                  <p className="text-xs text-red-600 font-medium mt-1">
                     Ticker is already taken
                   </p>
                 )}
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+            <div className="space-y-3">
+              <Label htmlFor="description" className="text-base">
+                Description
+              </Label>
               <Textarea
                 id="description"
                 placeholder="Describe your project, utility, and vision..."
-                className="resize-none min-h-[100px]"
+                className="resize-none min-h-[120px] text-base p-4"
                 {...register("description")}
               />
               {errors.description && (
@@ -644,13 +658,16 @@ export default function TokenLaunchPage() {
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="initialSupply">Initial Supply</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-3">
+                <Label htmlFor="initialSupply" className="text-base">
+                  Initial Supply
+                </Label>
                 <Input
                   id="initialSupply"
                   type="number"
                   placeholder="1000000"
+                  className="h-12 text-lg"
                   {...register("initialSupply")}
                 />
                 {errors.initialSupply && (
@@ -660,8 +677,8 @@ export default function TokenLaunchPage() {
                 )}
               </div>
 
-              <div className="space-y-4">
-                <Label>Token Logo</Label>
+              <div className="space-y-3">
+                <Label className="text-base">Token Logo</Label>
                 <div className="space-y-2">
                   <Controller
                     control={control}
@@ -683,16 +700,19 @@ export default function TokenLaunchPage() {
               </div>
             </div>
 
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium text-zinc-900 border-b border-zinc-100 pb-2">
+            <div className="space-y-6 pt-4">
+              <h3 className="text-xl font-medium text-zinc-900 border-b border-zinc-100 pb-4">
                 Social Links (Optional)
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="websiteUrl">Website</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <Label htmlFor="websiteUrl" className="text-base">
+                    Website
+                  </Label>
                   <Input
                     id="websiteUrl"
                     placeholder="https://yourproject.com"
+                    className="h-11"
                     {...register("websiteUrl")}
                   />
                   {errors.websiteUrl && (
@@ -701,11 +721,14 @@ export default function TokenLaunchPage() {
                     </p>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="twitterUrl">Twitter / X</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="twitterUrl" className="text-base">
+                    Twitter / X
+                  </Label>
                   <Input
                     id="twitterUrl"
                     placeholder="https://x.com/..."
+                    className="h-11"
                     {...register("twitterUrl")}
                   />
                   {errors.twitterUrl && (
@@ -714,11 +737,14 @@ export default function TokenLaunchPage() {
                     </p>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="telegramUrl">Telegram</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="telegramUrl" className="text-base">
+                    Telegram
+                  </Label>
                   <Input
                     id="telegramUrl"
                     placeholder="https://t.me/..."
+                    className="h-11"
                     {...register("telegramUrl")}
                   />
                   {errors.telegramUrl && (
@@ -727,11 +753,14 @@ export default function TokenLaunchPage() {
                     </p>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="discordUrl">Discord</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="discordUrl" className="text-base">
+                    Discord
+                  </Label>
                   <Input
                     id="discordUrl"
                     placeholder="https://discord.gg/..."
+                    className="h-11"
                     {...register("discordUrl")}
                   />
                   {errors.discordUrl && (
@@ -743,15 +772,15 @@ export default function TokenLaunchPage() {
               </div>
             </div>
 
-            <div className="pt-4">
+            <div className="pt-8">
               <Button
                 type="submit"
-                className="w-full bg-[#F2723B] hover:bg-[#e06532] text-white"
+                className="w-full md:w-auto md:min-w-[200px] h-12 text-lg bg-[#F2723B] hover:bg-[#e06532] text-white shadow-lg shadow-orange-500/20"
                 disabled={mutation.isPending || checkingTicker}
               >
                 {mutation.isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Submitting...
                   </>
                 ) : (
