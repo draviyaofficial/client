@@ -38,8 +38,8 @@ export default function IROsPage() {
       selectedCategory !== "All Categories" ? selectedCategory : undefined,
     ],
     queryFn: async () => {
-      // Fetch LIVE IROs to ensure they show up
-      return await listIROsFn({ status: "LIVE" });
+      // Fetch ALL IROs (Scheduled, Live, Completed, etc.)
+      return await listIROsFn({});
     },
   });
 
@@ -114,6 +114,22 @@ export default function IROsPage() {
         return 0;
     }
   });
+
+  // Helper function for status badge style
+  const getStatusBadgeStyle = (status: string) => {
+    switch (status) {
+      case "LIVE":
+        return "bg-orange-50 text-orange-600 border-orange-100";
+      case "SCHEDULED":
+        return "bg-blue-50 text-blue-600 border-blue-100";
+      case "COMPLETED":
+        return "bg-green-50 text-green-600 border-green-100";
+      case "FAILED":
+        return "bg-red-50 text-red-600 border-red-100";
+      default:
+        return "bg-zinc-50 text-zinc-600 border-zinc-100";
+    }
+  };
 
   return (
     <div className="space-y-10 bg-white rounded-xl p-10 min-h-[calc(100vh-2.5rem)]">
@@ -305,8 +321,12 @@ export default function IROsPage() {
                   <div className="px-2.5 py-1 rounded-md bg-zinc-100 text-zinc-600 text-xs font-semibold uppercase tracking-wider">
                     {iro.category}
                   </div>
-                  <div className="px-2.5 py-1 rounded-md bg-orange-50 text-orange-600 text-xs font-semibold uppercase tracking-wider border border-orange-100">
-                    IRO Live
+                  <div
+                    className={`px-2.5 py-1 rounded-md text-xs font-semibold uppercase tracking-wider border ${getStatusBadgeStyle(
+                      iro.status,
+                    )}`}
+                  >
+                    {iro.status}
                   </div>
                 </div>
               </CardHeader>
@@ -360,9 +380,23 @@ export default function IROsPage() {
                     <span>{iro.daysLeft} days left</span>
                   </div>
                   <Link href={`/iros/${iro.id}`} className="flex-1">
-                    <Button className="w-full bg-[#F2723B] hover:bg-[#d65f2c] text-white shadow-md shadow-orange-500/20 font-medium group transition-all">
-                      Participate
-                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+                    <Button
+                      className={`w-full text-white shadow-md font-medium group transition-all ${
+                        iro.status === "LIVE"
+                          ? "bg-[#F2723B] hover:bg-[#d65f2c] shadow-orange-500/20"
+                          : "bg-zinc-800 hover:bg-zinc-700 shadow-zinc-500/10"
+                      }`}
+                    >
+                      {iro.status === "LIVE" ? (
+                        <>
+                          Participate
+                          <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+                        </>
+                      ) : iro.status === "SCHEDULED" ? (
+                        "View Details"
+                      ) : (
+                        "View Results"
+                      )}
                     </Button>
                   </Link>
                 </div>

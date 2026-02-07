@@ -373,10 +373,30 @@ export default function IROPage() {
 
             {/* Status Badge */}
             <div className="flex flex-col items-end gap-2">
-              <div className="px-4 py-2 bg-green-500/20 text-green-300 rounded-lg font-medium border border-green-500/30 flex items-center gap-2 backdrop-blur-md">
-                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                LIVE SALE
-              </div>
+              {iro.status === "LIVE" && (
+                <div className="px-4 py-2 bg-green-500/20 text-green-300 rounded-lg font-medium border border-green-500/30 flex items-center gap-2 backdrop-blur-md">
+                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                  LIVE SALE
+                </div>
+              )}
+              {iro.status === "SCHEDULED" && (
+                <div className="px-4 py-2 bg-blue-500/20 text-blue-300 rounded-lg font-medium border border-blue-500/30 flex items-center gap-2 backdrop-blur-md">
+                  <div className="w-2 h-2 rounded-full bg-blue-400" />
+                  UPCOMING
+                </div>
+              )}
+              {iro.status === "COMPLETED" && (
+                <div className="px-4 py-2 bg-zinc-500/20 text-zinc-300 rounded-lg font-medium border border-zinc-500/30 flex items-center gap-2 backdrop-blur-md">
+                  <div className="w-2 h-2 rounded-full bg-zinc-400" />
+                  ENDED
+                </div>
+              )}
+              {iro.status === "FAILED" && (
+                <div className="px-4 py-2 bg-red-500/20 text-red-300 rounded-lg font-medium border border-red-500/30 flex items-center gap-2 backdrop-blur-md">
+                  <div className="w-2 h-2 rounded-full bg-red-400" />
+                  FAILED
+                </div>
+              )}
               <div className="text-sm text-indigo-200 flex items-center gap-1">
                 <Clock className="w-4 h-4" />
                 Ends in {timeLeft} days
@@ -552,17 +572,25 @@ export default function IROPage() {
 
               {privyUser ? (
                 <Button
-                  className="w-full bg-[#F2723B] hover:bg-[#e06532] text-white font-bold py-6 text-lg shadow-lg shadow-[#F2723B]/25"
+                  className={`w-full font-bold py-6 text-lg shadow-lg ${
+                    iro.status === "LIVE"
+                      ? "bg-[#F2723B] hover:bg-[#e06532] text-white shadow-[#F2723B]/25"
+                      : "bg-zinc-100 text-zinc-400 cursor-not-allowed shadow-none"
+                  }`}
                   onClick={handlePurchase}
-                  disabled={isBuying || !amount}
+                  disabled={isBuying || !amount || iro.status !== "LIVE"}
                 >
                   {isBuying ? (
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                       Processing...
                     </>
-                  ) : (
+                  ) : iro.status === "LIVE" ? (
                     "Buy Tokens"
+                  ) : iro.status === "SCHEDULED" ? (
+                    "Sale Starts Soon"
+                  ) : (
+                    "Sale Ended"
                   )}
                 </Button>
               ) : (

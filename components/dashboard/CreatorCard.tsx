@@ -10,9 +10,11 @@ interface CreatorCardProps {
   progress: number;
   target: string;
   raised: string;
-  daysLeft: number;
   category: string;
   avatar?: string | null;
+  status: "SCHEDULED" | "LIVE" | "COMPLETED" | "FAILED";
+  startTime: string;
+  endTime: string;
 }
 
 export function CreatorCard({
@@ -23,10 +25,32 @@ export function CreatorCard({
   progress,
   target,
   raised,
-  daysLeft,
   category,
   avatar,
+  status,
+  startTime,
+  endTime,
 }: CreatorCardProps) {
+  // Calculate time display based on status
+  const getTimeDisplay = () => {
+    const now = new Date();
+    if (status === "SCHEDULED") {
+      const start = new Date(startTime);
+      const diffTime = start.getTime() - now.getTime();
+      const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return `Starts in ${Math.max(0, days)} days`;
+    } else if (status === "LIVE") {
+      const end = new Date(endTime);
+      const diffTime = end.getTime() - now.getTime();
+      const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return `${Math.max(0, days)} days left`;
+    } else {
+      return "Ended";
+    }
+  };
+
+  const timeDisplay = getTimeDisplay();
+
   return (
     <div className="rounded-3xl border border-zinc-200 bg-white p-6 flex flex-col h-full">
       <div className="flex items-center gap-4 mb-4">
@@ -55,7 +79,9 @@ export function CreatorCard({
         </span>
       </div>
 
-      <p className="text-sm text-zinc-600 mb-4 line-clamp-2">{description}</p>
+      {description && (
+        <p className="text-sm text-zinc-600 mb-4 line-clamp-2">{description}</p>
+      )}
 
       {/* Progress Bar */}
       <div className="mb-4">
@@ -76,13 +102,17 @@ export function CreatorCard({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1 text-sm text-zinc-500">
           <Clock className="h-4 w-4" />
-          <span>{daysLeft} days left</span>
+          <span>{timeDisplay}</span>
         </div>
         <Link
           href={`/iros/${id}`}
-          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
+          className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+            status === "LIVE"
+              ? "bg-[#F2723B] text-white hover:bg-[#F2723B]/80"
+              : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+          }`}
         >
-          Participate
+          {status === "LIVE" ? "Participate" : "View Details"}
         </Link>
       </div>
     </div>

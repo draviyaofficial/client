@@ -24,7 +24,7 @@ export default function DashboardPage() {
   const { data: iros, isLoading: isLoadingIROs } = useQuery({
     queryKey: ["active-iros"],
     queryFn: async () => {
-      const data = await listIROsFn({ status: "LIVE", limit: 3 });
+      const data = await listIROsFn(); // add limit
       return data;
     },
     staleTime: 1000 * 60, // 1 minute
@@ -159,7 +159,7 @@ export default function DashboardPage() {
                   iro.token.user.creatorProfile?.displayName || "Creator"
                 }
                 name={iro.token.name}
-                description={iro.token.description || "No description"}
+                description={iro.token.description || ""}
                 progress={
                   parseFloat(iro.hardCap) > 0
                     ? (parseFloat(iro.totalRaised) / parseFloat(iro.hardCap)) *
@@ -168,13 +168,9 @@ export default function DashboardPage() {
                 }
                 target={`${parseFloat(iro.hardCap).toLocaleString()} SOL`}
                 raised={`${parseFloat(iro.totalRaised).toLocaleString()} SOL`}
-                daysLeft={Math.max(
-                  0,
-                  Math.ceil(
-                    (new Date(iro.endTime).getTime() - Date.now()) /
-                      (1000 * 60 * 60 * 24),
-                  ),
-                )}
+                status={iro.status}
+                startTime={iro.startTime}
+                endTime={iro.endTime}
                 category={iro.token.user.creatorProfile?.sector || "General"}
                 avatar={
                   iro.token.user.profilePicUrl ||
