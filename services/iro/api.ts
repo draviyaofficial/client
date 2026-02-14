@@ -180,3 +180,73 @@ export const getIROParticipantsFn = async (
   if (!json.ok) throw new Error(json.message || "Failed to fetch participants");
   return json.data;
 };
+
+export interface UserInvestment {
+  id: string; // Allocation ID
+  token: {
+    id: string;
+    name: string;
+    symbol: string;
+    logoUrl?: string; // Optional
+    mintAddress: string;
+  };
+  iroId: string;
+  totalAmount: string; // Decimal string
+  unlockedAmount: string; // Decimal string
+  claimedAmount: string; // Decimal string
+  claimableAmount: string; // Decimal string
+  lockedAmount: string; // Decimal string
+  vestingProgress: number; // 0-1
+  isFullyVested: boolean;
+  nextUnlockTime: number | null;
+  vestingEndTime: number;
+}
+
+/**
+ * Get User Investments
+ */
+export const getUserInvestmentsFn = async (
+  token: string,
+): Promise<UserInvestment[]> => {
+  const response = await fetch(`${API_URL}/v1/iro/user/investments`, {
+    method: "GET",
+    headers: {
+      ...defaultHeaders,
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const json: BackendResponse<UserInvestment[]> = await response.json();
+  if (!json.ok)
+    throw new Error(json.message || "Failed to fetch user investments");
+  return json.data;
+};
+
+/**
+ * Claim Tokens
+ */
+export const claimTokensFn = async (
+  token: string,
+  iroId: string,
+): Promise<{
+  txSignature: string;
+  amountClaimed: string;
+  remaining: string;
+}> => {
+  const response = await fetch(`${API_URL}/v1/iro/${iroId}/claim`, {
+    method: "POST",
+    headers: {
+      ...defaultHeaders,
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const json: BackendResponse<{
+    txSignature: string;
+    amountClaimed: string;
+    remaining: string;
+  }> = await response.json();
+
+  if (!json.ok) throw new Error(json.message || "Failed to claim tokens");
+  return json.data;
+};

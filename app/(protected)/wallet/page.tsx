@@ -17,6 +17,8 @@ import { toast } from "sonner";
 import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useUser } from "@/services/auth/model/hooks/useUser";
 import { connection } from "@/services/solana/connection";
+import InvestmentCard from "@/components/wallet/InvestmentCard";
+import { getUserInvestmentsFn } from "@/services/iro/api";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -30,7 +32,7 @@ interface Transaction {
 
 export default function WalletPage() {
   const { data: user, isLoading: isUserLoading } = useUser();
-  const { user: privyUser } = usePrivy();
+  const { user: privyUser, getAccessToken } = usePrivy();
   const [copied, setCopied] = useState(false);
 
   // Get wallet address from db user or privy user
@@ -167,8 +169,23 @@ export default function WalletPage() {
     }
   };
 
+  // Fetch Investments
+  const {
+    data: investments,
+    isLoading: isLoadingInvestments,
+    refetch: refetchInvestments,
+  } = useQuery({
+    queryKey: ["user-investments", walletAddress],
+    queryFn: async () => {
+      const token = await getAccessToken();
+      if (!token) return [];
+      return await getUserInvestmentsFn(token);
+    },
+    enabled: !!walletAddress, // and token is implicit
+  });
+
   const handleRefresh = async () => {
-    await Promise.all([refetchBalance(), refetchTx()]);
+    await Promise.all([refetchBalance(), refetchTx(), refetchInvestments()]);
     toast.success("Wallet refreshed");
   };
 
@@ -190,7 +207,7 @@ export default function WalletPage() {
           Wallet
         </h1>
         <p className="text-zinc-400 mt-1 text-lg">
-          Manage your assets and view transaction history.
+          Manage your assets and view your investment portfolio.
         </p>
       </div>
 
@@ -259,9 +276,11 @@ export default function WalletPage() {
 
           <button
             onClick={handleRefresh}
-            disabled={isLoadingBalance || isLoadingTx}
+            disabled={isLoadingBalance || isLoadingTx || isLoadingInvestments}
             className={`p-2 rounded-full hover:bg-white/10 transition-colors ${
-              isLoadingBalance || isLoadingTx ? "animate-spin" : ""
+              isLoadingBalance || isLoadingTx || isLoadingInvestments
+                ? "animate-spin"
+                : ""
             }`}
           >
             <RefreshCw className="w-5 h-5 text-white/60" />
@@ -317,83 +336,41 @@ export default function WalletPage() {
         </div>
       </div>
 
-      {/* Recent Activity Section */}
+      {/* My Investments Section */}
       <div>
         <h2 className="text-xl font-semibold text-zinc-900 mb-4">
-          Recent Activity
+          My Investments & Vesting
         </h2>
-        <div className="rounded-xl border border-zinc-200 overflow-hidden bg-white">
-          {isLoadingTx ? (
-            <div className="p-8 text-center text-zinc-500 animate-pulse">
-              Loading transactions...
-            </div>
-          ) : transactions.length > 0 ? (
-            <div className="divide-y divide-zinc-100">
-              {transactions.map((tx) => (
-                <div
-                  key={tx.signature}
-                  className="p-4 hover:bg-zinc-50 transition-colors flex items-center justify-between group"
-                >
-                  <div className="flex items-center gap-4">
-                    <div
-                      className={`p-2 rounded-full ${
-                        tx.err
-                          ? "bg-red-50 text-red-500"
-                          : "bg-green-50 text-green-500"
-                      }`}
-                    >
-                      {tx.err ? (
-                        <ArrowUpRight className="w-4 h-4" />
-                      ) : (
-                        <Check className="w-4 h-4" />
-                      )}
-                    </div>
-                    <div>
-                      <div className="font-mono text-sm text-zinc-900 font-medium">
-                        {tx.signature.slice(0, 8)}...{tx.signature.slice(-8)}
-                      </div>
-                      <div className="text-xs text-zinc-500">
-                        {tx.blockTime
-                          ? new Date(tx.blockTime * 1000).toLocaleString()
-                          : `Slot: ${tx.slot}`}
-                      </div>
-                    </div>
-                  </div>
 
-                  <div className="flex items-center gap-4">
-                    {tx.amount !== undefined && tx.amount !== 0 && (
-                      <span
-                        className={`text-sm font-medium ${
-                          tx.amount > 0 ? "text-green-600" : "text-zinc-600"
-                        }`}
-                      >
-                        {tx.amount > 0 ? "+" : ""}
-                        {tx.amount.toLocaleString(undefined, {
-                          maximumFractionDigits: 4,
-                        })}{" "}
-                        SOL
-                      </span>
-                    )}
-                    <a
-                      href={`https://explorer.solana.com/tx/${
-                        tx.signature
-                      }?cluster=${isProduction ? "mainnet-beta" : "devnet"}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-indigo-600 hover:text-indigo-700 font-medium opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      View Explorer
-                    </a>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="p-8 text-center text-zinc-500">
-              No transactions found
-            </div>
-          )}
-        </div>
+        {isLoadingInvestments ? (
+          <div className="grid grid-cols-1 gap-4">
+            {[1, 2].map((i) => (
+              <div
+                key={i}
+                className="h-64 bg-zinc-50 rounded-xl animate-pulse border border-zinc-200"
+              />
+            ))}
+          </div>
+        ) : investments && investments.length > 0 ? (
+          <div className="flex flex-col gap-6">
+            {investments.map((inv) => (
+              <InvestmentCard
+                key={inv.id}
+                investment={inv}
+                onClaimSuccess={refetchInvestments}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="p-12 text-center border border-zinc-200 rounded-xl bg-zinc-50">
+            <p className="text-zinc-500 text-lg">
+              You haven&apos;t participated in any IROs yet.
+            </p>
+            <p className="text-sm text-zinc-400 mt-2">
+              Check out the dashboard to find new opportunities.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
